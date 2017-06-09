@@ -7,3 +7,6 @@ Training project for GUI programming with Java.
 * Gradle
 * Card game
 * Blackjack
+
+## Resources
+* [Playing Cards](https://opengameart.org/content/playing-cards-vector-png)
