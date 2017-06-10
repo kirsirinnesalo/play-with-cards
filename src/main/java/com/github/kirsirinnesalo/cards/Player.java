@@ -23,7 +23,6 @@ public class Player {
     }
 
     public void takeCard(Card card) {
-        card.turnFaceUp();
         hand.add(card);
     }
 

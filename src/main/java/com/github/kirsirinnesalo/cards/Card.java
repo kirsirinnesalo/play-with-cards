@@ -10,12 +10,9 @@ public class Card {
     public final Rank rank;
     public final Suit suit;
 
-    private boolean faceUp;
-
     public Card(Rank rank, Suit suit) {
         this.rank = rank;
         this.suit = suit;
-        this.faceUp = true;
     }
 
     static boolean isFaceCard(Rank rank) {
@@ -24,18 +21,6 @@ public class Card {
 
     static boolean isAce(Rank rank) {
         return Rank.ACE.equals(rank);
-    }
-
-    public boolean isFaceUp() {
-        return faceUp;
-    }
-
-    public void turnFaceDown() {
-        faceUp = false;
-    }
-
-    public void turnFaceUp() {
-        faceUp = true;
     }
 
     @Override

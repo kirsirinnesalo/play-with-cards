@@ -20,7 +20,6 @@ class DealingGame implements Game {
         this.cardsPerHand = cardsPerHand;
 
         deck = new Deck52();
-        deck.turnFaceDown();
 
         players = rangeClosed(1, numberOfPlayers)
                 .mapToObj(playerNo -> new Player("Player " + playerNo))

@@ -36,14 +36,6 @@ public abstract class Deck {
         cards.forEach(action);
     }
 
-    public void turnFaceDown() {
-        forEach(Card::turnFaceDown);
-    }
-
-    public void turnFaceUp() {
-        forEach(Card::turnFaceUp);
-    }
-
     @Override
     public String toString() {
         return cards.stream().map(Card::toString).collect(Collectors.joining(","));
