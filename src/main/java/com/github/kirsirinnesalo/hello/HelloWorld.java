@@ -1,15 +1,26 @@
 package com.github.kirsirinnesalo.hello;
 
+import com.github.kirsirinnesalo.scene.control.ColorSelector;
+import com.github.kirsirinnesalo.scene.control.FontSelector;
+
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Control;
+import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static java.util.Arrays.asList;
+import static java.util.stream.IntStream.range;
 
 public class HelloWorld extends Application {
 
@@ -33,7 +44,7 @@ public class HelloWorld extends Application {
     }
 
     private Scene createSceneWith(Pane pane) {
-        return new Scene(pane, 300, 200, Color.MOCCASIN);
+        return new Scene(pane, 800, 400);
     }
 
     private BorderPane createPane() {
@@ -54,17 +65,37 @@ public class HelloWorld extends Application {
         Button exitButton = createButton("Quit");
         exitButton.setOnAction(event -> Platform.exit());
 
-        addButtonsTo(pane, helloButton, exitButton);
+        Label headerLabel = new Label("Hey!");
+
+        addTopTo(pane, headerLabel, helloButton, exitButton);
         pane.setCenter(text);
+        pane.setLeft(new FontSelector(headerLabel) {{
+            getSelectionModel().select("Arial Black");
+        }});
+        pane.setRight(new ColorSelector(pane) {{
+            getSelectionModel().select("Moccasin");
+        }});
     }
 
-    private void addButtonsTo(BorderPane pane, Button... buttons) {
-        HBox buttonBox = new HBox();
-        buttonBox.setAlignment(Pos.TOP_CENTER);
-        buttonBox.setSpacing(50);
-        buttonBox.setPadding(new Insets(20));
-        buttonBox.getChildren().addAll(buttons);
-        pane.setTop(buttonBox);
+    private void addTopTo(BorderPane pane, Control... nodes) {
+        GridPane box = new GridPane();
+        box.setAlignment(Pos.TOP_CENTER);
+        range(0, nodes.length).forEach($ -> {
+            box.getColumnConstraints().add(new ColumnConstraints() {{
+                setHgrow(Priority.ALWAYS);
+                setFillWidth(true);
+                setPercentWidth(100 / nodes.length);
+            }});
+        });
+        box.setPadding(new Insets(20));
+
+        AtomicInteger column = new AtomicInteger(0);
+        asList(nodes).forEach(node -> {
+            box.add(node, column.getAndAdd(1), 0);
+            GridPane.setHalignment(node, HPos.CENTER);
+        });
+
+        pane.setTop(box);
     }
 
     private void doGreet(Text text, Button helloButton) {
