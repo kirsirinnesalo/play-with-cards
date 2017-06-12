@@ -12,11 +12,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Arrays.asList;
@@ -58,6 +61,16 @@ public class HelloWorld extends Application {
     private void addComponentsTo(BorderPane pane) {
         Text text = new Text();
         text.setStyle(HELLO_TEXT_STYLE);
+        text.setTextAlignment(TextAlignment.CENTER);
+        BorderPane.setMargin(text, new Insets(10, 10, 100, 10));
+        text.setOnMouseClicked(event -> {
+            TextInputDialog dialog = new TextInputDialog(text.getText());
+            dialog.setTitle("Change text");
+            dialog.setHeaderText("Change the greeting text");
+            dialog.setContentText("Greeting:");
+            Optional<String> greeting = dialog.showAndWait();
+            greeting.ifPresent($ -> text.setText(greeting.get()));
+        });
 
         Button helloButton = createButton("Say hello...");
         doGreet(text, helloButton);
@@ -101,7 +114,7 @@ public class HelloWorld extends Application {
     private void doGreet(Text text, Button helloButton) {
         helloButton.setOnAction(event -> {
             if (text.getText().isEmpty()) {
-                text.setText("Hello World!\n");
+                text.setText("Hello World!");
                 helloButton.setText("Take it back");
             } else {
                 text.setText("");
