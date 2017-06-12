@@ -12,11 +12,15 @@ public class CardView extends ImageView {
     private final Image back;
     private boolean faceUp = false;
 
-    public CardView(Card card, int cardWidth, int cardHeight) {
+    public CardView(Card card) {
         this.card = card;
         face = createFaceImage();
         back = createBackImage();
         setImage(back);
+    }
+
+    public CardView(Card card, int cardWidth, int cardHeight) {
+        this(card);
         setFitWidth(cardWidth);
         setFitHeight(cardHeight);
     }
