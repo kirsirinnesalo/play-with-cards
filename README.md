@@ -1,10 +1,11 @@
-# card-games
+# play-with-cards
 
 Training project for GUI programming with Java.
 
 ## Buzzwords
 * JavaFX
 * Gradle
+* Hello world
 * Card game
 * Blackjack
 

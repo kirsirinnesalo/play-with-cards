@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'idea'
 
 jar {
-    baseName = 'Card Games'
+    baseName = 'Play with cards'
     version = "0.0.1"
 }
 
