@@ -11,10 +11,10 @@ public class BorderedTitledPane extends StackPane {
         Label title = new Label(titleText);
         title.getStyleClass().add("bordered-titled-title");
         title.setStyle("-fx-background-color: lightgrey;"
-                + " -fx-background-radius: 10 10 10 10;"
+                + " -fx-font-size: large;"
+                + " -fx-background-radius: 10;"
                 + " -fx-border: thin solid black;"
                 + " -fx-translate-y: -16;"
-                + " -fx-z-index: 99;"
                 + " -fx-padding: 5 10 5 10;");
         StackPane.setAlignment(title, Pos.TOP_CENTER);
 
@@ -25,10 +25,10 @@ public class BorderedTitledPane extends StackPane {
 
         getStyleClass().add("bordered-titled-border");
         setStyle("-fx-content-display: top;"
-                + " -fx-border-radius: 10 10 10 10;"
-                + " -fx-background-radius: 10 10 10 10;"
+                + " -fx-border-radius: 10;"
+                + " -fx-background-radius: 10;"
                 + " -fx-border-insets: 20 15 15 15;"
-                + " -fx-background-color: white;"
+                + " -fx-background-color: transparent;"
                 + " -fx-border-color: black;"
                 + " -fx-border-width: 1;");
 
