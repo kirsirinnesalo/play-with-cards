@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Card {
+public class Card implements Comparable<Card> {
     private static Collection<Rank> faceCards = Stream.of(Rank.JACK, Rank.QUEEN, Rank.KING).collect(Collectors.toList());
 
     public final Rank rank;
@@ -34,6 +34,28 @@ public class Card {
 
     public boolean isAce() {
         return isAce(rank);
+    }
+
+    @Override
+    public int compareTo(Card otherCard) {
+        return rank.compareTo(otherCard.rank);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (other == null || getClass() != other.getClass()) return false;
+
+        Card card = (Card) other;
+
+        return rank == card.rank && suit == card.suit;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = rank != null ? rank.hashCode() : 0;
+        result = 31 * result + (suit != null ? suit.hashCode() : 0);
+        return result;
     }
 
     public enum Color {BLACK, RED}

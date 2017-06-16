@@ -1,6 +1,11 @@
 package com.github.kirsirinnesalo.cli;
 
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Scanner;
 import java.util.function.Consumer;
+
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 public class Console {
 
@@ -13,7 +18,12 @@ public class Console {
     }
 
     public static void printEmptyLine() {
-        printLine("");
+        printLine(EMPTY);
+    }
+
+    public static String readLine() {
+        Scanner scanner = new Scanner(System.in);
+        return scanner.hasNext() ? scanner.nextLine() : EMPTY;
     }
 
 }
