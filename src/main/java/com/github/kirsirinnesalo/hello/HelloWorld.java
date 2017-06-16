@@ -76,7 +76,7 @@ public class HelloWorld extends Application {
         doGreet(text, helloButton);
 
         Button exitButton = createButton("Quit");
-        exitButton.setOnAction(event -> Platform.exit());
+        exitButton.setOnAction($ -> Platform.exit());
 
         Label headerLabel = new Label("Hey!");
 

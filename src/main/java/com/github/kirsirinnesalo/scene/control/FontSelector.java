@@ -1,7 +1,5 @@
 package com.github.kirsirinnesalo.scene.control;
 
-import org.apache.commons.lang3.StringUtils;
-
 import javafx.collections.FXCollections;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
