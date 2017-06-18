@@ -6,14 +6,19 @@ import com.github.kirsirinnesalo.cli.Console;
 import java.util.Scanner;
 
 class BlackjackCLI {
+    public static void main(String[] args) {
+        BlackjackGame game = new BlackjackGame();
+        new BlackjackCLI(game).play();
+    }
+
     private final BlackjackGame game;
     private int round = 0;
 
-    BlackjackCLI(BlackjackGame board) {
+    private BlackjackCLI(BlackjackGame board) {
         game = board;
     }
 
-    void play() {
+    private void play() {
         do {
             BlackjackPlayer player = game.getPlayer();
             game.getDeck().shuffle();
