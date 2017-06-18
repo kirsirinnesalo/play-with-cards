@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BlackjackPlayerTest {
     @Test
-    void whenBlackjackPlayerDoesNotNeedMoreCards() {
+    void whenBlackjackSumPlayerDoesNotNeedMoreCards() {
         assertFalse(getPlayerWithSum(BlackjackGame.BLACKJACK).needsMoreCards());
     }
 

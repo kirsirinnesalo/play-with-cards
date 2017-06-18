@@ -1,8 +1,12 @@
 package com.github.kirsirinnesalo.cards.blackjack;
 
+import com.github.kirsirinnesalo.cards.Card;
+
 import org.junit.jupiter.api.Test;
 
-import static com.github.kirsirinnesalo.cards.blackjack.BlackjackGame.BLACKJACK;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import static com.github.kirsirinnesalo.cards.blackjack.BlackjackPlayer.NOBODY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -77,10 +81,7 @@ class BlackjackGameTest {
         BlackjackDealer dealer = getDealerWithSum(19);
         int money = player.getMoney();
         int bet = 10;
-        BlackjackGame game = createGame(dealer, player);
-        game.setBet(bet);
-        player.quitGame();
-        game.payBet(player);
+        playGame(player, dealer, bet, player);
         assertEquals(money + bet, player.getMoney());
     }
 
@@ -90,10 +91,7 @@ class BlackjackGameTest {
         BlackjackDealer dealer = getDealerWithSum(20);
         int money = busted.getMoney();
         int bet = 10;
-        BlackjackGame game = createGame(dealer, busted);
-        game.setBet(bet);
-        busted.quitGame();
-        game.payBet(dealer);
+        playGame(busted, dealer, bet, dealer);
         assertEquals(money - bet, busted.getMoney());
     }
 
@@ -101,23 +99,24 @@ class BlackjackGameTest {
     void bustedPlayerKeepsTheBetWhenDealerBusted() {
         BlackjackPlayer player = getPlayerWithSum(22);
         int money = player.getMoney();
-        BlackjackGame game = createGame(getDealerWithSum(23), player);
-        game.setBet(10);
-        player.quitGame();
-        game.payBet(NOBODY);
+        playGame(player, getDealerWithSum(23), 10, NOBODY);
         assertEquals(money, player.getMoney());
     }
 
     @Test
     void blackjackPaysOneAndHalfOfBet() {
-        BlackjackPlayer player = getPlayerWithSum(BLACKJACK);
+        BlackjackPlayer player = getPlayerWithBlackjack();
         int money = player.getMoney();
         int bet = 10;
-        BlackjackGame game = createGame(getDealerWithSum(18), player);
+        playGame(player, getDealerWithSum(18), bet, player);
+        assertEquals(money + bet * 1.5, player.getMoney());
+    }
+
+    private void playGame(BlackjackPlayer player, BlackjackDealer dealer, int bet, BlackjackPlayer winner) {
+        BlackjackGame game = createGame(dealer, player);
         game.setBet(bet);
         player.quitGame();
-        game.payBet(player);
-        assertEquals(money + bet * 1.5, player.getMoney());
+        game.payBet(winner);
     }
 
     private BlackjackDealer getDealerWithSum(final int sum) {
@@ -134,6 +133,17 @@ class BlackjackGameTest {
             @Override
             int countSum() {
                 return sum;
+            }
+        };
+    }
+
+    private BlackjackPlayer getPlayerWithBlackjack() {
+        return new BlackjackPlayer("Test player", 100) {
+            @Override
+            public ObservableList<Card> getHand() {
+                Card king = new Card(Card.Rank.KING, Card.Suit.HEARTS);
+                Card ace = new Card(Card.Rank.ACE, Card.Suit.HEARTS);
+                return FXCollections.observableArrayList(king, ace);
             }
         };
     }

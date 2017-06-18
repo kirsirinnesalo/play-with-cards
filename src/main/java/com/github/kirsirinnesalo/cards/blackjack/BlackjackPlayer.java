@@ -35,16 +35,22 @@ public class BlackjackPlayer extends Player {
         hand.sort(Comparator.comparing(card -> card.rank));
         hand.sort(Collections.reverseOrder());
 
-        hand.forEach(card -> {
-            if (card.isFaceCard()) {
-                sum.add(FACE_CARD_VALUE);
-            } else if (card.isAce()) {
-                sum.add(aceValue(sum.intValue()));
-            } else {
-                sum.add(card.rank.numericValue());
-            }
-        });
+        hand.forEach(card -> sum.add(valueFor(card, sum.intValue())));
         return sum.intValue();
+    }
+
+    private int valueFor(Card card, int currentSum) {
+        if (card.isFaceCard()) {
+            return FACE_CARD_VALUE;
+        } else if (card.isAce()) {
+            return aceValue(currentSum);
+        } else {
+            return card.rank.numericValue();
+        }
+    }
+
+    int valueFor(Card card) {
+        return valueFor(card, 0);
     }
 
     private int aceValue(int sum) {
