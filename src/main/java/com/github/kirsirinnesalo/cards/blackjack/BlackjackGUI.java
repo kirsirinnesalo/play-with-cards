@@ -9,8 +9,6 @@ import com.github.kirsirinnesalo.scene.util.Utils;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -20,13 +18,11 @@ import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 import java.util.Arrays;
@@ -41,9 +37,8 @@ public class BlackjackGUI extends Application {
     private static final String GAME_TITLE = "Blackjack";
     private static final int CARD_WIDTH = 120;
     private static final int CARD_HEIGHT = 160;
-    private static final int PLAYER_PANE_WIDTH = CARD_WIDTH * 11;
-    private static final int PLAYER_PANE_HEIGHT = CARD_HEIGHT + 20;
-    private static final int TABLE_WIDTH = 1000;
+    private static final int PLAYER_PANE_WIDTH = CARD_WIDTH * 3;
+    private static final int TABLE_WIDTH = 600;
     private static final int TABLE_HEIGHT = 600;
     private static final Font HEADER_FONT = new Font("Arial Black", 30);
     private static final Font MONEY_FONT = new Font("Arial Black", 12);
@@ -56,8 +51,9 @@ public class BlackjackGUI extends Application {
     private Button betButton;
     private Node betNode;
     private TextField betField;
-    private Label currentBetAmount;
-    private Label moneyAmount;
+    private HBox currentBet;
+    private Label currentBetLabel;
+    private Label walletLabel;
 
     public BlackjackGUI() {
         this.game = new BlackjackGame();
@@ -82,7 +78,7 @@ public class BlackjackGUI extends Application {
 
         initBindings();
         hide(standButton, splitButton, doubleButton);
-        betNode.setVisible(true);
+        show(betNode);
 
         return new Scene(table, TABLE_WIDTH, TABLE_HEIGHT);
     }
@@ -140,33 +136,19 @@ public class BlackjackGUI extends Application {
 
 
     private Node createGameTable() {
-        GridPane pane = new GridPane();
+        VBox pane = new VBox();
         pane.setBackground(Utils.getBackgroundWith(Color.WHITESMOKE));
         pane.setStyle("-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: #e0e0e0;");
+        pane.setAlignment(Pos.TOP_CENTER);
 
-        dealerPane = new PlayerPane(game.getDealer(), PLAYER_PANE_WIDTH, PLAYER_PANE_HEIGHT, CARD_WIDTH, CARD_HEIGHT);
-        pane.add(dealerPane, 0, 0);
-        GridPane.setColumnSpan(dealerPane, 2);
+        dealerPane = new PlayerPane(game.getDealer(), CARD_WIDTH, CARD_HEIGHT);
+        dealerPane.setPrefWidth(PLAYER_PANE_WIDTH);
 
-        pane.setHgap(50);
-        pane.add(createMoneyLabels(), 0, 1);
-        pane.add(createBettingPane(), 1, 1);
+        PlayerPane playerPane = new PlayerPane(game.getPlayer(), CARD_WIDTH, CARD_HEIGHT);
+        playerPane.setPrefWidth(PLAYER_PANE_WIDTH);
 
-        PlayerPane playerPane = new PlayerPane(game.getPlayer(), PLAYER_PANE_WIDTH, PLAYER_PANE_HEIGHT, CARD_WIDTH, CARD_HEIGHT);
-        pane.add(playerPane, 0, 2);
-        GridPane.setColumnSpan(playerPane, 2);
-
+        pane.getChildren().addAll(dealerPane, createCurrentBetLabel(), createBetNode(), playerPane, createWalletLabel());
         return pane;
-    }
-
-    private Node createBettingPane() {
-        betNode = createBetNode();
-
-        GridPane box = new GridPane();
-        box.setPadding(new Insets(5, 5, 5, 20));
-        box.setHgap(50);
-        box.add(betNode, 1, 0);
-        return box;
     }
 
     private Node createBetNode() {
@@ -176,7 +158,8 @@ public class BlackjackGUI extends Application {
         betLabel.setLabelFor(betField);
         betButton = new Button("Bet");
 
-        return createHBox(betLabel, betField, betButton);
+        betNode = createHBox(betLabel, betField, betButton);
+        return betNode;
     }
 
     private HBox createHBox(Label label, TextField field, Button button) {
@@ -187,38 +170,30 @@ public class BlackjackGUI extends Application {
         return box;
     }
 
-    private Node createMoneyLabels() {
-        VBox moneyBox = new VBox();
-        GridPane.setMargin(moneyBox, new Insets(0, 0, 0, 50));
-        moneyBox.setAlignment(Pos.BASELINE_LEFT);
-        moneyBox.setSpacing(10);
-        moneyBox.getChildren().addAll(createWalletLabel(), createCurrentBetLabel());
-        return moneyBox;
-    }
-
-    private Node createCurrentBetLabel() {
-        currentBetAmount = createMoneyLabel(game.getBet());
-        return createLabelPair("Current bet: ", currentBetAmount);
-    }
-
-    private Node createWalletLabel() {
-        moneyAmount = createMoneyLabel(game.getPlayer().getMoney());
-        return createLabelPair("Wallet: ", moneyAmount);
-    }
-
-    private Label createMoneyLabel(int amount) {
-        Label moneyLabel = new Label(String.valueOf(amount));
-        moneyLabel.setFont(MONEY_FONT);
-        moneyLabel.setPrefWidth(50);
-        moneyLabel.setTextAlignment(TextAlignment.RIGHT);
-        return moneyLabel;
-    }
-
-    private Node createLabelPair(String amountLabelText, Label currentAmount) {
-        HBox currentBet = new HBox();
-        currentBet.setAlignment(Pos.BASELINE_RIGHT);
-        currentBet.getChildren().addAll(new Text(amountLabelText), currentAmount, new Text(" €"));
+    private HBox createCurrentBetLabel() {
+        currentBetLabel = createMoneyLabel(String.valueOf(game.getBet()));
+        currentBet = createMoneyLabelWith("Current bet: ", currentBetLabel);
+        currentBet.setPadding(new Insets(10));
         return currentBet;
+    }
+
+    private HBox createWalletLabel() {
+        walletLabel = createMoneyLabel(String.valueOf(game.getPlayer().getMoney()));
+        walletLabel.setPadding(new Insets(10));
+        return createMoneyLabelWith("Wallet: ", walletLabel);
+    }
+
+    private HBox createMoneyLabelWith(String text, Label label) {
+        HBox box = new HBox();
+        box.getChildren().addAll(new Text(text), label, new Text(" €"));
+        box.setAlignment(Pos.BASELINE_CENTER);
+        return box;
+    }
+
+    private Label createMoneyLabel(String text) {
+        Label moneyLabel = new Label(text);
+        moneyLabel.setFont(MONEY_FONT);
+        return moneyLabel;
     }
 
     private Node createHeader() {
@@ -269,6 +244,7 @@ public class BlackjackGUI extends Application {
         doubleButton.managedProperty().bind(doubleButton.visibleProperty());
         splitButton.managedProperty().bind(splitButton.visibleProperty());
         betNode.managedProperty().bind(betNode.visibleProperty());
+        currentBet.managedProperty().bind(currentBet.visibleProperty());
 
         dealerPane.getRevealHiddenCardProperty().addListener((observable, oldValue, revealCard) -> {
             CardView cardView = (CardView) dealerPane.getCardPane().getChildren().get(1);
@@ -281,8 +257,8 @@ public class BlackjackGUI extends Application {
     }
 
     private void bindMoneyLabels() {
-        moneyAmount.textProperty().bind(game.getPlayer().getMoneyProperty().asString());
-        currentBetAmount.textProperty().bind(game.getBetProperty().asString());
+        walletLabel.textProperty().bind(game.getPlayer().getMoneyProperty().asString());
+        currentBetLabel.textProperty().bind(game.getBetProperty().asString());
     }
 
     private void setButtonActions() {
@@ -305,9 +281,10 @@ public class BlackjackGUI extends Application {
         dealerPane.hideHiddenCard();
         BlackjackPlayer player = game.getPlayer();
         if (game.getDealer().hasBlackjack() || player.hasBlackjack()) {
+            dealerPane.revealHiddenCard();
             gameOver();
         } else {
-            show(standButton, doubleButton);
+            show(standButton, doubleButton, currentBet);
             hide(betNode);
             List<Card> hand = player.getHand();
             if (player.valueFor(hand.get(0)) == player.valueFor(hand.get(1))) {

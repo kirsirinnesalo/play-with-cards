@@ -12,10 +12,10 @@ public class DeckPane extends StackPane {
 
     private Deck deck;
     private boolean faceUp;
-    private int width;
-    private int height;
+    private double width;
+    private double height;
 
-    public DeckPane(Deck deck, boolean faceUp, int width, int height) {
+    public DeckPane(Deck deck, boolean faceUp, double width, double height) {
         this.deck = deck;
         this.faceUp = faceUp;
         this.width = width;
