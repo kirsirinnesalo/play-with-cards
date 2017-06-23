@@ -115,7 +115,7 @@ class BlackjackGameTest {
     private void playGame(BlackjackPlayer player, BlackjackDealer dealer, int bet, BlackjackPlayer winner) {
         BlackjackGame game = createGame(dealer, player);
         game.setBet(bet);
-        player.quitGame();
+        player.quitRound();
         game.payBet(winner);
     }
 

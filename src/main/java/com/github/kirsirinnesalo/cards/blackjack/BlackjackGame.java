@@ -7,6 +7,8 @@ import javafx.beans.property.SimpleIntegerProperty;
 
 import java.util.stream.Stream;
 
+import static com.github.kirsirinnesalo.cards.blackjack.BlackjackGame.Phase.BETTING;
+import static com.github.kirsirinnesalo.cards.blackjack.BlackjackGame.Phase.PLAYER_TURN;
 import static com.github.kirsirinnesalo.cards.blackjack.BlackjackPlayer.NOBODY;
 import static java.util.stream.IntStream.rangeClosed;
 
@@ -21,8 +23,8 @@ class BlackjackGame implements Game {
     private BlackjackPlayer player;
 
     private Deck deck;
-    private boolean gameInProgress = false;
     private IntegerProperty bet = new SimpleIntegerProperty(0);
+    private Phase phase;
 
     BlackjackGame() {
         setupTable();
@@ -42,22 +44,18 @@ class BlackjackGame implements Game {
         dealer = new BlackjackDealer("Dealer", 17);
         player = new BlackjackPlayer("Player", 1000);
 
-        gameInProgress = false;
+        newRound();
     }
 
-    void resetGame() {
+    void newRound() {
         Stream.of(dealer, player).forEach(p -> deck.addAll(p.resetHand()));
         deck.shuffle();
-        gameInProgress = false;
         bet.setValue(0);
+        setPhase(BETTING);
     }
 
     Deck getDeck() {
         return deck;
-    }
-
-    boolean isGameInProgress() {
-        return gameInProgress;
     }
 
     IntegerProperty getBetProperty() {
@@ -72,19 +70,27 @@ class BlackjackGame implements Game {
         this.bet.setValue(bet);
     }
 
+    Phase getPhase() {
+        return phase;
+    }
+
+    void setPhase(Phase phase) {
+        this.phase = phase;
+    }
+
     void deal() {
         rangeClosed(1, 2).forEach($ -> {
             hit(getDealer());
             hit(getPlayer());
         });
-        gameInProgress = true;
+        setPhase(PLAYER_TURN);
     }
 
     void hit(BlackjackPlayer player) {
         Card card = deck.dealCard();
         player.takeCard(card);
         if (player.isBusted() || player.hasBlackjack()) {
-            player.quitGame();
+            player.quitRound();
         }
     }
 
@@ -132,4 +138,12 @@ class BlackjackGame implements Game {
         }
     }
 
+    enum Phase {
+        NEW_GAME,
+        NEW_ROUND,
+        BETTING,
+        PLAYER_TURN,
+        DEALER_TURN,
+        ROUND_OVER
+    }
 }

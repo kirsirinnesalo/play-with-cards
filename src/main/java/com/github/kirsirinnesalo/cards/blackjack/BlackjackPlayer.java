@@ -65,7 +65,7 @@ public class BlackjackPlayer extends Player {
         return getHand().size() == 2 && countSum() == BLACKJACK;
     }
 
-    void quitGame() {
+    void quitRound() {
         gameOver = true;
     }
 
@@ -109,5 +109,9 @@ public class BlackjackPlayer extends Player {
 
     int getMoney() {
         return money.intValue();
+    }
+
+    void setMoney(int amount) {
+        this.money.set(amount);
     }
 }

@@ -30,7 +30,7 @@ class BlackjackCLI {
                 break;
             }
             gameOver();
-            game.resetGame();
+            game.newRound();
         } while (playAgain());
         Console.printEmptyLine();
         Console.printLine("You leave with " + game.getPlayer().getMoney() + " €");
@@ -80,7 +80,7 @@ class BlackjackCLI {
         if (playerNeedsMoreCards()) {
             game.hit(game.getPlayer());
         } else {
-            game.getPlayer().quitGame();
+            game.getPlayer().quitRound();
         }
         showHands();
     }

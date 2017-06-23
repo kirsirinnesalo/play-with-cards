@@ -7,15 +7,20 @@ import com.github.kirsirinnesalo.cards.control.DeckPane;
 import com.github.kirsirinnesalo.cards.control.PlayerPane;
 import com.github.kirsirinnesalo.scene.util.Utils;
 
+import org.apache.commons.lang3.StringUtils;
+
 import javafx.application.Application;
-import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -23,14 +28,17 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.OptionalInt;
 
 import static com.github.kirsirinnesalo.cards.blackjack.BlackjackGame.BLACKJACK;
+import static com.github.kirsirinnesalo.cards.blackjack.BlackjackGame.Phase.*;
+import static com.github.kirsirinnesalo.cards.blackjack.BlackjackPlayer.NOBODY;
 
 public class BlackjackGUI extends Application {
 
@@ -54,6 +62,7 @@ public class BlackjackGUI extends Application {
     private HBox currentBet;
     private Label currentBetLabel;
     private Label walletLabel;
+    private TextFlow message;
 
     public BlackjackGUI() {
         this.game = new BlackjackGame();
@@ -95,30 +104,9 @@ public class BlackjackGUI extends Application {
 
     private Node createDeckPane() {
         DeckPane deckPane = new DeckPane(game.getDeck(), false, CARD_WIDTH, CARD_HEIGHT);
-        deckPane.setOnMouseClicked((MouseEvent event) -> {
-            BlackjackPlayer player = game.getPlayer();
-            BlackjackDealer dealer = game.getDealer();
-            if (game.isGameInProgress()) {
-                hit(player);
-            } else {
-                if (game.getBetProperty().intValue() > 0) {
-                    deal();
-                } else {
-                    showWarning("Set the bet first.");
-                }
-            }
-            if (player.isGameOver()) {
-                autoPlay(dealer);
-            }
-        });
+        deckPane.setOnMouseClicked((MouseEvent event) -> playGame());
         deckPane.setOnMouseEntered(e -> deckPane.setCursor(Cursor.HAND));
         return deckPane;
-    }
-
-    private void showWarning(String warning) {
-        Alert alert = new Alert(AlertType.WARNING);
-        alert.setHeaderText(warning);
-        alert.show();
     }
 
     private Node createGameButtons() {
@@ -147,8 +135,19 @@ public class BlackjackGUI extends Application {
         PlayerPane playerPane = new PlayerPane(game.getPlayer(), CARD_WIDTH, CARD_HEIGHT);
         playerPane.setPrefWidth(PLAYER_PANE_WIDTH);
 
-        pane.getChildren().addAll(dealerPane, createCurrentBetLabel(), createBetNode(), playerPane, createWalletLabel());
+        pane.getChildren().addAll(dealerPane, createMessagePane(), createCurrentBetLabel(), createBetNode(), playerPane, createWalletLabel());
         return pane;
+    }
+
+    private TextFlow createMessagePane() {
+        message = new TextFlow();
+        message.setTextAlignment(TextAlignment.CENTER);
+        return message;
+    }
+
+    private void clearMessage() {
+        message.getChildren().clear();
+        hide(message);
     }
 
     private Node createBetNode() {
@@ -243,6 +242,7 @@ public class BlackjackGUI extends Application {
         standButton.managedProperty().bind(standButton.visibleProperty());
         doubleButton.managedProperty().bind(doubleButton.visibleProperty());
         splitButton.managedProperty().bind(splitButton.visibleProperty());
+        message.managedProperty().bind(message.visibleProperty());
         betNode.managedProperty().bind(betNode.visibleProperty());
         currentBet.managedProperty().bind(currentBet.visibleProperty());
 
@@ -259,12 +259,71 @@ public class BlackjackGUI extends Application {
     private void bindMoneyLabels() {
         walletLabel.textProperty().bind(game.getPlayer().getMoneyProperty().asString());
         currentBetLabel.textProperty().bind(game.getBetProperty().asString());
+        betField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*")) {
+                betField.setText(newValue.replaceAll("[^\\d]", ""));
+            }
+        });
     }
 
     private void setButtonActions() {
-        betButton.setOnAction($ -> bet());
+        betField.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode() == KeyCode.ENTER) {
+                    bet();
+                }
+            }
+        });
+        betButton.setOnAction($ -> {
+            bet();
+        });
         doubleButton.setOnAction($ -> doubleDown());
         standButton.setOnAction($ -> stand());
+    }
+
+    private void playGame() {
+        switch (game.getPhase()) {
+            case NEW_GAME:
+                game.getPlayer().setMoney(1000);
+                newRound();
+                break;
+            case NEW_ROUND:
+                newRound();
+                break;
+            case BETTING:
+                if (game.getBet() > 0) {
+                    deal();
+                } else {
+                    showMessage("Set the bet first.");
+                }
+                break;
+            case PLAYER_TURN:
+                hit(game.getPlayer());
+                break;
+            case DEALER_TURN:
+                autoPlay(game.getDealer());
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void showMessage(String text) {
+        showMessage(new Text(text));
+    }
+
+    private void showMessage(Node... messages) {
+        clearMessage();
+        message.getChildren().addAll(messages);
+        show(message);
+    }
+
+    private void newRound() {
+        clearMessage();
+        hide(standButton, splitButton, doubleButton);
+        show(currentBet, betNode);
+        game.newRound();
     }
 
     private void autoPlay(BlackjackDealer dealer) {
@@ -272,7 +331,7 @@ public class BlackjackGUI extends Application {
         if (!dealer.hasBlackjack()) {
             game.autoPlay(dealer);
         }
-        gameOver();
+        roundOver();
     }
 
     private void deal() {
@@ -282,8 +341,9 @@ public class BlackjackGUI extends Application {
         BlackjackPlayer player = game.getPlayer();
         if (game.getDealer().hasBlackjack() || player.hasBlackjack()) {
             dealerPane.revealHiddenCard();
-            gameOver();
+            roundOver();
         } else {
+            game.setPhase(PLAYER_TURN);
             show(standButton, doubleButton, currentBet);
             hide(betNode);
             List<Card> hand = player.getHand();
@@ -298,6 +358,10 @@ public class BlackjackGUI extends Application {
             game.hit(player);
             if (player.countSum() == BLACKJACK) {
                 stand();
+            } else if (player.isBusted()) {
+                player.quitRound();
+                game.setPhase(DEALER_TURN);
+                autoPlay(game.getDealer());
             }
         }
         splitButton.setVisible(false);
@@ -305,7 +369,7 @@ public class BlackjackGUI extends Application {
     }
 
     private void bet() {
-        if (!game.isGameInProgress()) {
+        if (!StringUtils.isEmpty(betField.getText())) {
             int money = game.getPlayer().getMoney();
             OptionalInt betValue = OptionalInt.of(Integer.valueOf(betField.getText()));
             if (betValue.orElse(0) <= money) {
@@ -315,6 +379,7 @@ public class BlackjackGUI extends Application {
                     betField.setText(String.valueOf(money));
                 }
             }
+            clearMessage();
         }
     }
 
@@ -324,44 +389,67 @@ public class BlackjackGUI extends Application {
             game.setBet(doubledBet);
             hit(game.getPlayer());
             stand();
-        } else {
-            showWarning("You don't have enough money to double down.");
         }
     }
 
     private void stand() {
-        if (game.isGameInProgress()) {
-            game.getPlayer().quitGame();
-            dealerPane.revealHiddenCard();
-            game.autoPlay(game.getDealer());
-            gameOver();
+        game.getPlayer().quitRound();
+        dealerPane.revealHiddenCard();
+        game.autoPlay(game.getDealer());
+        game.setPhase(ROUND_OVER);
+        roundOver();
+    }
+
+    private void roundOver() {
+        Player winner = game.resolveWinner();
+        game.payBet(winner);
+        hide(currentBet, standButton, doubleButton, splitButton);
+        showMessage(createRoundOverText(winner));
+        if (game.getPlayer().getMoney() > 0) {
+            game.setPhase(NEW_ROUND);
+        } else {
+            game.setPhase(NEW_GAME);
         }
     }
 
-    private void gameOver() {
-        Player winner = game.resolveWinner();
-        game.payBet(winner);
-        Alert dialog = new Alert(AlertType.CONFIRMATION);
-        dialog.setTitle("Round Over");
-        dialog.setHeaderText("Round Over!");
-        dialog.setContentText(game.getDealer().toString() + "\n"
-                + game.getPlayer().toString() + "\n"
-                + winner.getName() + " won."
-                + "\n\n"
-                + "You have now " + game.getPlayer().getMoney() + " €."
-                + "\n\n"
-                + "Deal again?"
-        );
-        Optional<ButtonType> result = dialog.showAndWait();
-        result.ifPresent(buttonType -> {
-            if (ButtonType.OK == buttonType) {
-                hide(standButton, splitButton, doubleButton);
-                show(betNode);
-                game.resetGame();
+    private Node[] createRoundOverText(Player winner) {
+        return new Node[]{createText("Round over.", "-fx-font-weight: bold;"),
+                createWinnerText(winner),
+                createText(showWinning(winner, game.getBet()), "-fx-font-style: italic;")};
+    }
+
+    private String showWinning(Player winner, int bet) {
+        if (game.getDealer().equals(winner)) {
+            return "  -" + bet + " €";
+        }
+        return "  +" + bet + " €";
+    }
+
+    private Text createWinnerText(Player winner) {
+        String winnerText;
+        String style = "-fx-font-size: 2em; -fx-font-weight: bold;";
+        if (NOBODY.equals(winner)) {
+            if (game.getPlayer().isBusted()) {
+                winnerText = " Both busted!";
             } else {
-                Platform.exit();
+                winnerText = " It's a tie!";
             }
-        });
+        } else if (game.getDealer().equals(winner)) {
+            winnerText = " You lost.";
+            style += " -fx-fill: red;";
+        } else {
+            winnerText = " You won!";
+            style += " -fx-fill: green; -fx-font-style: italic;";
+        }
+        Text text = new Text(winnerText);
+        text.setStyle(style);
+        return text;
+    }
+
+    private Text createText(String text, String style) {
+        Text textNode = new Text(text);
+        textNode.setStyle(style);
+        return textNode;
     }
 
 }
