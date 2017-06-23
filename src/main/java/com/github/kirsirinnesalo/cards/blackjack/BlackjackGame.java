@@ -45,13 +45,17 @@ class BlackjackGame implements Game {
         player = new BlackjackPlayer("Player", 1000);
 
         newRound();
+        setPhase(BETTING);
     }
 
     void newRound() {
+        resetDeck();
+        bet.setValue(0);
+    }
+
+    void resetDeck() {
         Stream.of(dealer, player).forEach(p -> deck.addAll(p.resetHand()));
         deck.shuffle();
-        bet.setValue(0);
-        setPhase(BETTING);
     }
 
     Deck getDeck() {
@@ -126,16 +130,21 @@ class BlackjackGame implements Game {
     void payBet(Player winner) {
         if (!NOBODY.equals(winner)) {
             BlackjackPlayer currentPlayer = getPlayer();
-            int winning = bet.intValue();
-            if (currentPlayer.equals(winner)) {
-                if (currentPlayer.hasBlackjack()) {
-                    winning = (int) (bet.intValue() * 1.5);
-                }
-            } else {
-                winning = -bet.intValue();
-            }
+            int winning = getWinning(winner, currentPlayer);
             currentPlayer.addMoney(winning);
         }
+    }
+
+    int getWinning(Player winner, BlackjackPlayer player) {
+        int winning = bet.intValue();
+        if (player.equals(winner)) {
+            if (player.hasBlackjack()) {
+                winning = (int) (bet.intValue() * 1.5);
+            }
+        } else {
+            winning = -bet.intValue();
+        }
+        return winning;
     }
 
     enum Phase {
@@ -144,6 +153,7 @@ class BlackjackGame implements Game {
         BETTING,
         PLAYER_TURN,
         DEALER_TURN,
-        ROUND_OVER
+        ROUND_OVER,
+        GAME_OVER
     }
 }

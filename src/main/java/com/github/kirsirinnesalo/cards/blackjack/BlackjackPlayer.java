@@ -114,4 +114,8 @@ public class BlackjackPlayer extends Player {
     void setMoney(int amount) {
         this.money.set(amount);
     }
+
+    boolean canDouble(int bet) {
+        return bet * 2 <= getMoney();
+    }
 }
