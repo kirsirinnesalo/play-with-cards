@@ -1,10 +1,9 @@
 package com.github.kirsirinnesalo.cards.blackjack;
 
-import com.github.kirsirinnesalo.cards.Card;
 import com.github.kirsirinnesalo.cards.Player;
 import com.github.kirsirinnesalo.cards.control.CardView;
 import com.github.kirsirinnesalo.cards.control.DeckPane;
-import com.github.kirsirinnesalo.cards.control.PlayerPane;
+import com.github.kirsirinnesalo.cards.control.HandPane;
 import com.github.kirsirinnesalo.scene.util.Utils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -31,9 +30,7 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.OptionalInt;
-import java.util.stream.Stream;
 
 import static com.github.kirsirinnesalo.cards.blackjack.BlackjackGame.BLACKJACK;
 import static com.github.kirsirinnesalo.cards.blackjack.BlackjackGame.Phase.*;
@@ -47,11 +44,11 @@ public class BlackjackGUI extends Application {
     private static final int PLAYER_PANE_WIDTH = CARD_WIDTH * 3;
     private static final int TABLE_WIDTH = 600;
     private static final int TABLE_HEIGHT = 600;
-    private static final Font HEADER_FONT = new Font("Arial Black", 30);
     private static final Font MONEY_FONT = new Font("Arial Black", 12);
 
     private BlackjackGame game;
-    private PlayerPane dealerPane;
+    private HandPane dealerPane;
+    private HandPane playerPane;
     private Button standButton;
     private Button doubleButton;
     private Button splitButton;
@@ -61,6 +58,7 @@ public class BlackjackGUI extends Application {
     private HBox currentBet;
     private Label currentBetLabel;
     private Label walletLabel;
+    private HBox walletNode;
     private TextFlow message;
 
     public BlackjackGUI() {
@@ -128,10 +126,12 @@ public class BlackjackGUI extends Application {
         pane.setStyle("-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: #e0e0e0;");
         pane.setAlignment(Pos.TOP_CENTER);
 
-        dealerPane = new PlayerPane(game.getDealer(), CARD_WIDTH, CARD_HEIGHT);
+        BlackjackDealer dealer = game.getDealer();
+        dealerPane = new HandPane(dealer.getName(), dealer.getHand(), CARD_WIDTH, CARD_HEIGHT);
         dealerPane.setPrefWidth(PLAYER_PANE_WIDTH);
 
-        PlayerPane playerPane = new PlayerPane(game.getPlayer(), CARD_WIDTH, CARD_HEIGHT);
+        BlackjackPlayer player = game.getPlayer();
+        playerPane = new HandPane(player.getName(), player.getHand(), CARD_WIDTH, CARD_HEIGHT);
         playerPane.setPrefWidth(PLAYER_PANE_WIDTH);
 
         pane.getChildren().addAll(dealerPane, createMessagePane(), createCurrentBetLabel(), createBetNode(), playerPane, createWalletLabel());
@@ -178,7 +178,8 @@ public class BlackjackGUI extends Application {
     private HBox createWalletLabel() {
         walletLabel = createMoneyLabel(String.valueOf(game.getPlayer().getMoney()));
         walletLabel.setPadding(new Insets(10));
-        return createMoneyLabelWith("Wallet: ", walletLabel);
+        walletNode = createMoneyLabelWith("Wallet: ", walletLabel);
+        return walletNode;
     }
 
     private HBox createMoneyLabelWith(String text, Label label) {
@@ -195,11 +196,6 @@ public class BlackjackGUI extends Application {
     }
 
     private Node createHeader() {
-        Label headerLabel = new Label(GAME_TITLE);
-        headerLabel.setFont(HEADER_FONT);
-        HBox header = new HBox(headerLabel);
-        header.setAlignment(Pos.TOP_CENTER);
-        header.setPadding(new Insets(20));
         return createEmptyHBox();
     }
 
@@ -244,6 +240,9 @@ public class BlackjackGUI extends Application {
         message.managedProperty().bind(message.visibleProperty());
         betNode.managedProperty().bind(betNode.visibleProperty());
         currentBet.managedProperty().bind(currentBet.visibleProperty());
+        dealerPane.managedProperty().bind(dealerPane.visibleProperty());
+        playerPane.managedProperty().bind(playerPane.visibleProperty());
+        walletNode.managedProperty().bind(walletNode.visibleProperty());
 
         dealerPane.getRevealHiddenCardProperty().addListener((observable, oldValue, revealCard) -> {
             CardView cardView = (CardView) dealerPane.getCardPane().getChildren().get(1);
@@ -280,8 +279,7 @@ public class BlackjackGUI extends Application {
     private void playGame() {
         switch (game.getPhase()) {
             case NEW_GAME:
-                game.getPlayer().setMoney(1000);
-                newRound();
+                newGame();
                 break;
             case NEW_ROUND:
                 newRound();
@@ -317,17 +315,23 @@ public class BlackjackGUI extends Application {
         show(message);
     }
 
+    private void newGame() {
+        show(dealerPane, playerPane, walletNode);
+        game.getPlayer().setMoney(1000);
+        newRound();
+    }
+
     private void newRound() {
         clearMessage();
         hide(standButton, splitButton, doubleButton);
         show(currentBet, betNode);
-        game.setPhase(BETTING);
         game.newRound();
+        game.setPhase(BETTING);
     }
 
     private void autoPlay(BlackjackDealer dealer) {
         dealerPane.revealHiddenCard();
-        if (!dealer.hasBlackjack()) {
+        if (!dealer.hasBlackjack() && !game.getPlayer().isBusted()) {
             game.autoPlay(dealer);
         }
         roundOver();
@@ -344,12 +348,12 @@ public class BlackjackGUI extends Application {
         } else {
             game.setPhase(PLAYER_TURN);
             show(standButton, currentBet);
-            if (player.canDouble(game.getBet())) {
+            hide(betNode);
+            int bet = game.getBet();
+            if (player.canDoubleOrSplit(bet)) {
                 show(doubleButton);
             }
-            hide(betNode);
-            List<Card> hand = player.getHand();
-            if (player.canDouble(game.getBet()) && player.valueFor(hand.get(0)) == player.valueFor(hand.get(1))) {
+            if (player.canSplit(bet)) {
                 show(splitButton);
             }
         }
@@ -358,10 +362,10 @@ public class BlackjackGUI extends Application {
     private void hit(BlackjackPlayer player) {
         if (player.needsMoreCards()) {
             game.hit(player);
-            if (player.countSum() == BLACKJACK) {
+            if (player.getCurrentHandSum() == BLACKJACK) {
                 stand();
             } else if (player.isBusted()) {
-                player.quitRound();
+                player.closeHand();
                 game.setPhase(DEALER_TURN);
                 autoPlay(game.getDealer());
             }
@@ -395,7 +399,7 @@ public class BlackjackGUI extends Application {
     }
 
     private void stand() {
-        game.getPlayer().quitRound();
+        game.getPlayer().closeHand();
         dealerPane.revealHiddenCard();
         game.autoPlay(game.getDealer());
         game.setPhase(ROUND_OVER);
@@ -415,7 +419,7 @@ public class BlackjackGUI extends Application {
     }
 
     private void gameOver() {
-        game.resetDeck();
+        game.clearHands();
         showMessage(createText("GAME OVER.", "-fx-font-weight: bold; -fx-font-size: large;"),
                 new Text(" You lost all your money. Start a new game?"));
         game.setPhase(NEW_GAME);

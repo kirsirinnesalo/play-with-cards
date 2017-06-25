@@ -2,26 +2,37 @@ package com.github.kirsirinnesalo.cards;
 
 import javafx.collections.ObservableList;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public abstract class Deck {
 
     private ObservableList<Card> cards;
+    private List<Card> cardsDrawn;
 
     Deck() {
         cards = setupDeck();
+        cardsDrawn = new ArrayList<>(cards.size());
     }
 
     abstract ObservableList<Card> setupDeck();
+
+    public void reset() {
+        cards.addAll(cardsDrawn);
+        cardsDrawn.clear();
+    }
 
     public void shuffle() {
         Collections.shuffle(cards);
     }
 
     public Card dealCard() {
-        return cards.remove(getLastIndexOfStack());
+        Card card = cards.remove(getLastIndexOfStack());
+        cardsDrawn.add(card);
+        return card;
     }
 
     private int getLastIndexOfStack() {

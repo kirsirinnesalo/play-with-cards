@@ -5,14 +5,14 @@ import com.github.kirsirinnesalo.cli.Console;
 
 public class DealingGameCLI {
 
-    public static void main(String[] args) {
-        new DealingGameCLI(new DealingGame(3, 5)).play();
-    }
-
     private final DealingGame game;
 
     private DealingGameCLI(DealingGame game) {
         this.game = game;
+    }
+
+    public static void main(String[] args) {
+        new DealingGameCLI(new DealingGame(3, 5)).play();
     }
 
     private void play() {
@@ -30,7 +30,7 @@ public class DealingGameCLI {
     private void dealHandFor(Player player) {
         game.dealHandFor(player);
 
-        Console.printLine("  " + player.getName() + ": " + player.handAsString());
+        Console.printLine("  " + player.getName() + ": " + player.getHand().handAsString());
         Console.printLine("  " + game.getDeckLabelText());
         Console.printEmptyLine();
     }

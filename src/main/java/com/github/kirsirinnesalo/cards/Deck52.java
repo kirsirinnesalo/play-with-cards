@@ -14,7 +14,9 @@ public class Deck52 extends Deck {
     @Override
     public ObservableList<Card> setupDeck() {
         return Arrays.stream(Suit.values())
+                .filter(suit -> !Suit.JOKER.equals(suit))
                 .flatMap(suit -> Arrays.stream(Rank.values())
+                        .filter(rank -> !Rank.JOKER.equals(rank))
                         .map(rank -> new Card(rank, suit)))
                 .collect(Collectors.toCollection(FXCollections::observableArrayList));
     }

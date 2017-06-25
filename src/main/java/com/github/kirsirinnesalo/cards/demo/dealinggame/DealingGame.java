@@ -1,9 +1,6 @@
 package com.github.kirsirinnesalo.cards.demo.dealinggame;
 
-import com.github.kirsirinnesalo.cards.Deck;
-import com.github.kirsirinnesalo.cards.Deck52;
-import com.github.kirsirinnesalo.cards.Game;
-import com.github.kirsirinnesalo.cards.Player;
+import com.github.kirsirinnesalo.cards.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,7 +16,7 @@ class DealingGame implements Game {
     DealingGame(int numberOfPlayers, int cardsPerHand) {
         this.cardsPerHand = cardsPerHand;
 
-        deck = new Deck52();
+        deck = new Deck52With2Jokers();
 
         players = rangeClosed(1, numberOfPlayers)
                 .mapToObj(playerNo -> new Player("Player " + playerNo))

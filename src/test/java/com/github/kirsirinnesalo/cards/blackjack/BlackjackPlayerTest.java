@@ -6,10 +6,10 @@ import com.github.kirsirinnesalo.cards.Card.Suit;
 
 import org.junit.jupiter.api.Test;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class BlackjackPlayerTest {
     @Test
@@ -34,7 +34,7 @@ class BlackjackPlayerTest {
     void aceIsCountedToEleven() {
         Card ace = new Card(Rank.ACE, Suit.HEARTS);
         Card nine = new Card(Rank.NINE, Suit.HEARTS);
-        assertEquals(20, getPlayerWithHand(ace, nine).countSum());
+        assertEquals(20, getPlayerWithHand(ace, nine).getCurrentHandSum());
     }
 
     @Test
@@ -42,22 +42,29 @@ class BlackjackPlayerTest {
         Card ace = new Card(Rank.ACE, Suit.HEARTS);
         Card nine = new Card(Rank.NINE, Suit.HEARTS);
         Card deuce = new Card(Rank.DEUCE, Suit.HEARTS);
-        assertEquals(12, getPlayerWithHand(ace, nine, deuce).countSum());
+        assertEquals(12, getPlayerWithHand(ace, nine, deuce).getCurrentHandSum());
+    }
+
+    @Test
+    void countBustedSumWithAces() {
+        Card aceOfHearts = new Card(Rank.ACE, Suit.HEARTS);
+        Card aceOfClubs = new Card(Rank.ACE, Suit.CLUBS);
+        Card deuce = new Card(Rank.DEUCE, Suit.DIAMONDS);
+        Card kingOfHearts = new Card(Rank.KING, Suit.HEARTS);
+        Card kingOfSpades = new Card(Rank.KING, Suit.SPADES);
+        assertEquals(24, getPlayerWithHand(aceOfHearts, aceOfClubs, deuce, kingOfHearts, kingOfSpades).getCurrentHandSum());
     }
 
     private BlackjackPlayer getPlayerWithHand(Card... cards) {
-        return new BlackjackPlayer("Test player", 100) {
-            @Override
-            public ObservableList<Card> getHand() {
-                return FXCollections.observableArrayList(cards);
-            }
-        };
+        BlackjackPlayer player = new BlackjackPlayer("Test player", 100);
+        Arrays.stream(cards).forEach(player::takeCard);
+        return player;
     }
 
     private BlackjackPlayer getPlayerWithSum(final int sum) {
         return new BlackjackPlayer("Test player", 100) {
             @Override
-            int countSum() {
+            int getCurrentHandSum() {
                 return sum;
             }
         };

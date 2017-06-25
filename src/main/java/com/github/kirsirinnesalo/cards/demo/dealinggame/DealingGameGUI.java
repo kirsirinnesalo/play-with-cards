@@ -2,7 +2,7 @@ package com.github.kirsirinnesalo.cards.demo.dealinggame;
 
 import com.github.kirsirinnesalo.cards.Deck;
 import com.github.kirsirinnesalo.cards.control.DeckPane;
-import com.github.kirsirinnesalo.cards.control.PlayerPane;
+import com.github.kirsirinnesalo.cards.control.HandPane;
 import com.github.kirsirinnesalo.scene.util.Utils;
 
 import javafx.application.Application;
@@ -23,9 +23,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class DealingGameGUI extends Application {
 
     private static final String GAME_TITLE = "Dealing Game";
-    private static final int CARDS_PER_HAND = 7;
+    private static final int CARDS_PER_HAND = 13;
     private static final int NUMBER_OF_PLAYERS = 2;
-    private static final int TABLE_WIDTH = 600;
+    private static final int TABLE_WIDTH = 700;
     private static final int TABLE_HEIGHT = 400;
     private static final int CARD_WIDTH = 70;
     private static final int CARD_HEIGHT = 100;
@@ -98,7 +98,8 @@ public class DealingGameGUI extends Application {
 
     private void resetGame() {
         Deck deck = game.getDeck();
-        game.getPlayers().forEach(player -> deck.addAll(player.resetHand()));
+        game.getPlayers().forEach(player -> player.getHand().clear());
+        deck.reset();
         deck.shuffle();
     }
 
@@ -111,9 +112,9 @@ public class DealingGameGUI extends Application {
         pane.setBackground(Utils.TRANSPARENT_BACKGROUND);
         AtomicInteger playerRow = new AtomicInteger(0);
         game.getPlayers().forEach(player -> {
-            Pane playerPane = new PlayerPane(player, CARD_WIDTH, CARD_HEIGHT);
+            Pane playerPane = new HandPane(player.getName(), player.getHand(), CARD_WIDTH, CARD_HEIGHT);
             GridPane.setMargin(playerPane, new Insets(5, 0, 1, 3));
-            playerPane.setPrefWidth(420);
+            playerPane.setPrefWidth(500);
             pane.add(playerPane, 0, playerRow.getAndAdd(1));
         });
         pane.setAlignment(Pos.BASELINE_LEFT);

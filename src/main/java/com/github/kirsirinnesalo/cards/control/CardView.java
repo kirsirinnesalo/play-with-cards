@@ -5,6 +5,8 @@ import com.github.kirsirinnesalo.cards.Card;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+import static com.github.kirsirinnesalo.cards.Card.Rank.JOKER;
+
 public class CardView extends ImageView {
 
     private final Card card;
@@ -48,6 +50,10 @@ public class CardView extends ImageView {
     }
 
     private Image createFaceImage() {
+        if (JOKER.equals(card.rank)) {
+            Card.Color color = card.getColor();
+            return loadCardImage(color.name().toLowerCase() + "_" + "joker");
+        }
         return loadCardImage(card.rank.asText() + "_of_" + card.suit.asText());
     }
 

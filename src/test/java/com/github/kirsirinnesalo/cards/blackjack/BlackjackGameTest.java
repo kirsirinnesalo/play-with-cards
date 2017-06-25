@@ -4,8 +4,7 @@ import com.github.kirsirinnesalo.cards.Card;
 
 import org.junit.jupiter.api.Test;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import java.util.stream.Stream;
 
 import static com.github.kirsirinnesalo.cards.blackjack.BlackjackPlayer.NOBODY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -115,14 +114,14 @@ class BlackjackGameTest {
     private void playGame(BlackjackPlayer player, BlackjackDealer dealer, int bet, BlackjackPlayer winner) {
         BlackjackGame game = createGame(dealer, player);
         game.setBet(bet);
-        player.quitRound();
+        player.closeHand();
         game.payBet(winner);
     }
 
     private BlackjackDealer getDealerWithSum(final int sum) {
         return new BlackjackDealer("Test dealer", sum) {
             @Override
-            int countSum() {
+            int getCurrentHandSum() {
                 return sum;
             }
         };
@@ -131,21 +130,18 @@ class BlackjackGameTest {
     private BlackjackPlayer getPlayerWithSum(final int sum) {
         return new BlackjackPlayer("Test player", 100) {
             @Override
-            int countSum() {
+            int getCurrentHandSum() {
                 return sum;
             }
         };
     }
 
     private BlackjackPlayer getPlayerWithBlackjack() {
-        return new BlackjackPlayer("Test player", 100) {
-            @Override
-            public ObservableList<Card> getHand() {
-                Card king = new Card(Card.Rank.KING, Card.Suit.HEARTS);
-                Card ace = new Card(Card.Rank.ACE, Card.Suit.HEARTS);
-                return FXCollections.observableArrayList(king, ace);
-            }
-        };
+        BlackjackPlayer player = new BlackjackPlayer("Test player", 100);
+        Card king = new Card(Card.Rank.KING, Card.Suit.HEARTS);
+        Card ace = new Card(Card.Rank.ACE, Card.Suit.HEARTS);
+        Stream.of(king, ace).forEach(player::takeCard);
+        return player;
     }
 
     private BlackjackGame createGame(BlackjackDealer gameDealer, BlackjackPlayer gamePlayer) {

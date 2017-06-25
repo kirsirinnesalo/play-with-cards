@@ -1,7 +1,7 @@
 package com.github.kirsirinnesalo.cards.control;
 
 import com.github.kirsirinnesalo.cards.Card;
-import com.github.kirsirinnesalo.cards.Player;
+import com.github.kirsirinnesalo.cards.Hand;
 import com.github.kirsirinnesalo.scene.control.BorderedTitledPane;
 
 import javafx.beans.property.BooleanProperty;
@@ -14,27 +14,27 @@ import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 
-public class PlayerPane extends StackPane {
-    private final Player player;
+public class HandPane extends StackPane {
+    private final Hand hand;
     private final Pane cardPane;
     private final int cardWidth;
     private final int cardHeight;
     private BooleanProperty revealHiddenCard = new SimpleBooleanProperty(true);
     private double translateX;
 
-    public PlayerPane(Player player, int cardWidth, int cardHeight) {
-        this.player = player;
+    public HandPane(String title, Hand hand, int cardWidth, int cardHeight) {
+        this.hand = hand;
         this.cardWidth = cardWidth;
         this.cardHeight = cardHeight;
         this.translateX = cardWidth * 0.2;
 
         cardPane = new StackPane();
         cardPane.setPadding(new Insets(5));
-        cardPane.setPrefHeight(cardHeight+50);
+        cardPane.setPrefHeight(cardHeight + 50);
 
-        player.getHand().addListener(this::updatePlayerBoxView);
+        hand.getCards().addListener(this::updatePlayerBoxView);
 
-        getChildren().add(new BorderedTitledPane(player.getName(), cardPane));
+        getChildren().add(new BorderedTitledPane(title, cardPane));
     }
 
     public Pane getCardPane() {
@@ -83,7 +83,7 @@ public class PlayerPane extends StackPane {
     private void refreshPlayerHand() {
         ObservableList<Node> cards = cardPane.getChildren();
         cards.clear();
-        player.getHand().forEach(card -> cards.add(new CardView(card, cardWidth, cardHeight)));
+        hand.forEach(card -> cards.add(new CardView(card, cardWidth, cardHeight)));
     }
 
 }

@@ -1,84 +1,92 @@
 package com.github.kirsirinnesalo.cards.blackjack;
 
 import com.github.kirsirinnesalo.cards.Card;
+import com.github.kirsirinnesalo.cards.Hand;
 import com.github.kirsirinnesalo.cards.Player;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.LongAdder;
 
-import static com.github.kirsirinnesalo.cards.blackjack.BlackjackGame.*;
+import static com.github.kirsirinnesalo.cards.Card.Rank.ACE;
+import static com.github.kirsirinnesalo.cards.blackjack.BlackjackGame.BLACKJACK;
+import static com.github.kirsirinnesalo.cards.blackjack.BlackjackGame.FACE_CARD_VALUE;
 
 public class BlackjackPlayer extends Player {
     static final BlackjackPlayer NOBODY = new BlackjackPlayer("Nobody", 0);
-    private IntegerProperty money = new SimpleIntegerProperty(0);
 
-    private boolean gameOver = false;
+    private final List<Hand> hands;
+    private Hand currentHand;
+    private IntegerProperty money = new SimpleIntegerProperty(0);
+    private IntegerProperty currentHandSum = new SimpleIntegerProperty();
 
     BlackjackPlayer(String name, int money) {
         super(name);
         this.money.set(money);
+        hands = new ArrayList<>(2);
+        hands.add(currentHand = new Hand());
+        currentHandSum.set(0);
+        currentHand.getCards().addListener((ListChangeListener<Card>) c -> currentHandSum.set(countSum()));
     }
 
-    public boolean needsMoreCards() {
-        return !gameOver && countSum() < BLACKJACK;
-    }
-
-    int countSum() {
+    private int countSum() {
         final LongAdder sum = new LongAdder();
-
-        ObservableList<Card> hand = getHand();
-        hand.sort(Comparator.comparing(card -> card.rank));
-        hand.sort(Collections.reverseOrder());
-
-        hand.forEach(card -> sum.add(valueFor(card, sum.intValue())));
+        List<Card> cards = currentHand.getCards();
+        cards.forEach(card -> sum.add(valueFor(card)));
+        long numOfAces = cards.stream().filter(card -> ACE.equals(card.rank)).count();
+        while (numOfAces > 0) {
+            if (sum.intValue() > BLACKJACK) {
+                sum.add(-10);
+                numOfAces--;
+            } else {
+                break;
+            }
+        }
         return sum.intValue();
     }
 
-    private int valueFor(Card card, int currentSum) {
+    @Override
+    public Hand getHand() {
+        return currentHand;
+    }
+
+    int getCurrentHandSum() {
+        return currentHandSum.get();
+    }
+
+    public boolean needsMoreCards() {
+        return currentHand.isOpen() && getCurrentHandSum() < BLACKJACK;
+    }
+
+    private int valueFor(Card card) {
         if (card.isFaceCard()) {
             return FACE_CARD_VALUE;
         } else if (card.isAce()) {
-            return aceValue(currentSum);
+            return 11;
         } else {
             return card.rank.numericValue();
         }
     }
 
-    int valueFor(Card card) {
-        return valueFor(card, 0);
-    }
-
-    private int aceValue(int sum) {
-        if (sum + ACE_VALUE_BIG > BLACKJACK) {
-            return ACE_VALUE_SMALL;
-        } else {
-            return ACE_VALUE_BIG;
-        }
-    }
-
     boolean hasBlackjack() {
-        return getHand().size() == 2 && countSum() == BLACKJACK;
+        return currentHand.size() == 2 && getCurrentHandSum() == BLACKJACK;
     }
 
-    void quitRound() {
-        gameOver = true;
-    }
-
-    boolean isGameOver() {
-        return gameOver;
+    void closeHand() {
+        currentHand.close();
     }
 
     boolean isBusted() {
-        return countSum() > BLACKJACK;
+        return getCurrentHandSum() > BLACKJACK;
     }
 
-    private String handSum() {
-        int sum = countSum();
+    private String handSumString() {
+        int sum = currentHandSum.get();
         String handSum = " => " + sum;
         if (hasBlackjack()) {
             handSum += " BLACKJACK";
@@ -88,15 +96,18 @@ public class BlackjackPlayer extends Player {
         return handSum;
     }
 
-    @Override
-    public String toString() {
-        return super.toString() + handSum();
+    void clearHands() {
+        hands.forEach(Hand::clear);
+        if (hands.size() == 2) {
+            hands.remove(1);
+        }
+        currentHand = hands.get(0);
+        currentHand.open();
     }
 
     @Override
-    public ObservableList<Card> resetHand() {
-        gameOver = false;
-        return super.resetHand();
+    public String toString() {
+        return super.toString() + handSumString();
     }
 
     void addMoney(int amount) {
@@ -115,7 +126,12 @@ public class BlackjackPlayer extends Player {
         this.money.set(amount);
     }
 
-    boolean canDouble(int bet) {
+    boolean canDoubleOrSplit(int bet) {
         return bet * 2 <= getMoney();
+    }
+
+    boolean canSplit(int bet) {
+        ObservableList<Card> cards = currentHand.getCards();
+        return cards.size() == 2 && canDoubleOrSplit(bet) && valueFor(cards.get(0)) == valueFor(cards.get(1));
     }
 }

@@ -6,16 +6,16 @@ import com.github.kirsirinnesalo.cli.Console;
 import java.util.Scanner;
 
 class BlackjackCLI {
-    public static void main(String[] args) {
-        BlackjackGame game = new BlackjackGame();
-        new BlackjackCLI(game).play();
-    }
-
     private final BlackjackGame game;
     private int round = 0;
 
     private BlackjackCLI(BlackjackGame board) {
         game = board;
+    }
+
+    public static void main(String[] args) {
+        BlackjackGame game = new BlackjackGame();
+        new BlackjackCLI(game).play();
     }
 
     private void play() {
@@ -58,29 +58,32 @@ class BlackjackCLI {
 
     private Player playGame() {
         BlackjackDealer dealer = game.getDealer();
-        firstDeal();
+        deal();
         if (!dealer.hasBlackjack()) {
+            BlackjackPlayer player = game.getPlayer();
             do {
-                dealRound();
-            } while (!game.getPlayer().isGameOver());
+                playRound();
+            } while (player.getHand().isOpen());
 
-            game.autoPlay(dealer);
+            if (!player.isBusted()) {
+                game.autoPlay(dealer);
+            }
         }
         return game.resolveWinner();
     }
 
-    private void firstDeal() {
+    private void deal() {
         newRound();
         game.deal();
         showHands();
     }
 
-    private void dealRound() {
+    private void playRound() {
         newRound();
         if (playerNeedsMoreCards()) {
             game.hit(game.getPlayer());
         } else {
-            game.getPlayer().quitRound();
+            game.getPlayer().closeHand();
         }
         showHands();
     }

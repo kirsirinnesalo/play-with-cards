@@ -11,7 +11,7 @@ class BlackjackDealer extends BlackjackPlayer {
 
     @Override
     public boolean needsMoreCards() {
-        return countSum() < playUntilSum;
+        return getCurrentHandSum() < playUntilSum;
     }
 
 }

@@ -16,8 +16,6 @@ class BlackjackGame implements Game {
 
     static final int BLACKJACK = 21;
     static final int FACE_CARD_VALUE = 10;
-    static final int ACE_VALUE_BIG = 11;
-    static final int ACE_VALUE_SMALL = 1;
 
     private BlackjackDealer dealer;
     private BlackjackPlayer player;
@@ -49,13 +47,14 @@ class BlackjackGame implements Game {
     }
 
     void newRound() {
-        resetDeck();
+        clearHands();
+        deck.reset();
+        deck.shuffle();
         bet.setValue(0);
     }
 
-    void resetDeck() {
-        Stream.of(dealer, player).forEach(p -> deck.addAll(p.resetHand()));
-        deck.shuffle();
+    void clearHands() {
+        Stream.of(dealer, player).forEach(BlackjackPlayer::clearHands);
     }
 
     Deck getDeck() {
@@ -94,13 +93,15 @@ class BlackjackGame implements Game {
         Card card = deck.dealCard();
         player.takeCard(card);
         if (player.isBusted() || player.hasBlackjack()) {
-            player.quitRound();
+            player.closeHand();
         }
     }
 
     Player resolveWinner() {
         BlackjackDealer currentDealer = getDealer();
         BlackjackPlayer currentPlayer = getPlayer();
+        int dealerHandSum = currentDealer.getCurrentHandSum();
+        int playerHandSum = currentPlayer.getCurrentHandSum();
         if (currentDealer.hasBlackjack()) {
             if (currentPlayer.hasBlackjack()) {
                 return NOBODY;
@@ -115,10 +116,10 @@ class BlackjackGame implements Game {
             return currentPlayer;
         } else if (currentPlayer.isBusted()) {
             return currentDealer;
-        } else if (currentDealer.countSum() == currentPlayer.countSum()) {
+        } else if (dealerHandSum == playerHandSum) {
             return NOBODY;
         }
-        return currentDealer.countSum() > currentPlayer.countSum() ? currentDealer : currentPlayer;
+        return dealerHandSum > playerHandSum ? currentDealer : currentPlayer;
     }
 
     void autoPlay(BlackjackPlayer player) {

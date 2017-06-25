@@ -9,10 +9,16 @@ public class Card implements Comparable<Card> {
 
     public final Rank rank;
     public final Suit suit;
+    private final Color color;
 
     public Card(Rank rank, Suit suit) {
+        this(rank, suit, suit.color);
+    }
+
+    public Card(Rank rank, Suit suit, Color color) {
         this.rank = rank;
         this.suit = suit;
+        this.color = color;
     }
 
     static boolean isFaceCard(Rank rank) {
@@ -58,6 +64,10 @@ public class Card implements Comparable<Card> {
         return result;
     }
 
+    public Color getColor() {
+        return color;
+    }
+
     public enum Color {BLACK, RED}
 
     //https://en.wikipedia.org/wiki/Playing_cards_in_Unicode
@@ -65,7 +75,8 @@ public class Card implements Comparable<Card> {
         SPADES("\u2660", Color.BLACK),
         HEARTS("\u2665", Color.RED),
         DIAMONDS("\u2666", Color.RED),
-        CLUBS("\u2663", Color.BLACK);
+        CLUBS("\u2663", Color.BLACK),
+        JOKER("JOKER", Color.RED);
 
         final String value;
         final Color color;
@@ -93,7 +104,8 @@ public class Card implements Comparable<Card> {
         TEN("10"),
         JACK("J"),
         QUEEN("Q"),
-        KING("K");
+        KING("K"),
+        JOKER("");
 
         String value;
 
