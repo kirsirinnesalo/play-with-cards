@@ -5,7 +5,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 jar {
-    baseName = 'Play with cards'
+    baseName = 'Play with JavaFX'
     version = "0.0.1"
 }
 

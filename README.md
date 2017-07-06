@@ -1,4 +1,4 @@
-# play-with-cards
+# play-with-fx
 
 Training project for GUI programming with Java.
 
@@ -8,6 +8,7 @@ Training project for GUI programming with Java.
 * Hello world
 * Card game
 * Blackjack
+* Wheel of Fortune
 
 ## Resources
 * [Playing Cards](https://opengameart.org/content/playing-cards-vector-png)
