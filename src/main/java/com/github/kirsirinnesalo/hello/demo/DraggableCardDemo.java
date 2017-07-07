@@ -2,14 +2,14 @@ package com.github.kirsirinnesalo.hello.demo;
 
 import com.github.kirsirinnesalo.model.Card;
 import com.github.kirsirinnesalo.control.CardView;
-import com.github.kirsirinnesalo.control.DraggableCardView;
 
 import javafx.application.Application;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-public class CardDemo extends Application {
+public class DraggableCardDemo extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -32,3 +32,30 @@ public class CardDemo extends Application {
     }
 
 }
+
+class DraggableCardView extends CardView {
+    private final Delta delta = new Delta();
+
+    public DraggableCardView(Card card, int cardWidth, int cardHeight) {
+        super(card, cardWidth, cardHeight);
+
+        setOnMouseEntered(e -> setCursor(Cursor.HAND));
+        setOnMousePressed(event -> {
+            setCursor(Cursor.CLOSED_HAND);
+            delta.x = getTranslateX() - event.getSceneX();
+            delta.y = getTranslateY() - event.getSceneY();
+        });
+        setOnMouseDragged(event -> {
+            setCursor(Cursor.CLOSED_HAND);
+            setTranslateX(event.getSceneX() + delta.x);
+            setTranslateY(event.getSceneY() + delta.y);
+        });
+        setOnMouseReleased(e -> setCursor(Cursor.HAND));
+    }
+
+    private class Delta {
+        double x, y;
+    }
+
+}
+
