@@ -13,7 +13,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
-public class DraggingDemo extends Application {
+public class DraggingCirclesDemo extends Application {
     private Pane leftPane;
     private Pane rightPane;
 
