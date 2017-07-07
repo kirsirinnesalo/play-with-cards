@@ -7,6 +7,9 @@ import javafx.stage.Stage;
 
 public abstract class GameFX extends Application {
 
+    static final double DEFAULT_WIDTH = 800;
+    static final double DEFAULT_HEIGHT = 600;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle(getTitle());
@@ -17,9 +20,13 @@ public abstract class GameFX extends Application {
 
     protected abstract String getTitle();
 
-    protected abstract double getWidth();
+    protected double getWidth() {
+        return DEFAULT_WIDTH;
+    }
 
-    protected abstract double getHeight();
+    protected double getHeight() {
+        return DEFAULT_HEIGHT;
+    }
 
     protected abstract Parent createGameTable();
 

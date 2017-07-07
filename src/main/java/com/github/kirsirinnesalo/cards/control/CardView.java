@@ -21,13 +21,13 @@ public class CardView extends ImageView {
         setImage(back);
     }
 
-    CardView(Card card, double cardWidth, double cardHeight) {
+    public CardView(Card card, double cardWidth, double cardHeight) {
         this(card);
         setFitWidth(cardWidth);
         setFitHeight(cardHeight);
     }
 
-    boolean isFaceUp() {
+    public boolean isFaceUp() {
         return faceUp;
     }
 
@@ -75,4 +75,7 @@ public class CardView extends ImageView {
         return classLoader.getResource(imagePathName).toExternalForm();
     }
 
+    public Card getCard() {
+        return card;
+    }
 }

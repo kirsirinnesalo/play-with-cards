@@ -115,7 +115,12 @@ public class Card implements Comparable<Card> {
 
         public int numericValue() {
             if (isFaceCard(this)) {
-                return 0;
+                switch (this) {
+                    case JACK: return 11;
+                    case QUEEN: return 12;
+                    case KING: return 13;
+                    default: return 0;
+                }
             } else if (isAce(this)) {
                 return 1;
             }

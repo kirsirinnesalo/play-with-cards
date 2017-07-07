@@ -59,4 +59,8 @@ public abstract class Deck {
     public void addAll(ObservableList<Card> cards) {
         this.cards.addAll(cards);
     }
+
+    public ObservableList<Card> getCards() {
+        return cards;
+    }
 }
