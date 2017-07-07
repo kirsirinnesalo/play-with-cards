@@ -1,15 +1,15 @@
-package com.github.kirsirinnesalo.cards.blackjack;
+package com.github.kirsirinnesalo.game.blackjack;
 
-import com.github.kirsirinnesalo.cards.*;
+import com.github.kirsirinnesalo.model.*;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
 import java.util.stream.Stream;
 
-import static com.github.kirsirinnesalo.cards.blackjack.BlackjackGame.Phase.BETTING;
-import static com.github.kirsirinnesalo.cards.blackjack.BlackjackGame.Phase.PLAYER_TURN;
-import static com.github.kirsirinnesalo.cards.blackjack.BlackjackPlayer.NOBODY;
+import static com.github.kirsirinnesalo.game.blackjack.BlackjackGame.Phase.BETTING;
+import static com.github.kirsirinnesalo.game.blackjack.BlackjackGame.Phase.PLAYER_TURN;
+import static com.github.kirsirinnesalo.game.blackjack.BlackjackPlayer.NOBODY;
 import static java.util.stream.IntStream.rangeClosed;
 
 class BlackjackGame implements Game {

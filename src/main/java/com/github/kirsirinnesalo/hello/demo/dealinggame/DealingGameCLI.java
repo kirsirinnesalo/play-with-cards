@@ -1,6 +1,6 @@
-package com.github.kirsirinnesalo.cards.demo.dealinggame;
+package com.github.kirsirinnesalo.hello.demo.dealinggame;
 
-import com.github.kirsirinnesalo.cards.Player;
+import com.github.kirsirinnesalo.model.Player;
 import com.github.kirsirinnesalo.cli.Console;
 
 public class DealingGameCLI {

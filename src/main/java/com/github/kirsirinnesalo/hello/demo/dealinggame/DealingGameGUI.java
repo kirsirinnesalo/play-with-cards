@@ -1,8 +1,8 @@
-package com.github.kirsirinnesalo.cards.demo.dealinggame;
+package com.github.kirsirinnesalo.hello.demo.dealinggame;
 
-import com.github.kirsirinnesalo.cards.Deck;
-import com.github.kirsirinnesalo.cards.control.DeckPane;
-import com.github.kirsirinnesalo.cards.control.HandPane;
+import com.github.kirsirinnesalo.model.Deck;
+import com.github.kirsirinnesalo.control.DeckPane;
+import com.github.kirsirinnesalo.control.HandPane;
 import com.github.kirsirinnesalo.scene.util.Utils;
 
 import javafx.application.Application;

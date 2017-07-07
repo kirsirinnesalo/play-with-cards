@@ -1,6 +1,6 @@
-package com.github.kirsirinnesalo.cards.demo.dealinggame;
+package com.github.kirsirinnesalo.hello.demo.dealinggame;
 
-import com.github.kirsirinnesalo.cards.*;
+import com.github.kirsirinnesalo.model.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
