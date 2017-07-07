@@ -14,7 +14,7 @@ public class CardView extends ImageView {
     private final Image back;
     private boolean faceUp = false;
 
-    CardView(Card card) {
+    public CardView(Card card) {
         this.card = card;
         face = createFaceImage();
         back = createBackImage();
