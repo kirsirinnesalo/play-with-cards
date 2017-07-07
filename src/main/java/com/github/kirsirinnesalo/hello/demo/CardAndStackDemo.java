@@ -1,8 +1,8 @@
-package com.github.kirsirinnesalo.hello;
+package com.github.kirsirinnesalo.hello.demo;
 
-import com.github.kirsirinnesalo.cards.Card;
-import com.github.kirsirinnesalo.cards.Deck52;
-import com.github.kirsirinnesalo.cards.control.CardView;
+import com.github.kirsirinnesalo.model.Card;
+import com.github.kirsirinnesalo.model.Deck52;
+import com.github.kirsirinnesalo.control.CardView;
 import com.github.kirsirinnesalo.control.Stack;
 import com.github.kirsirinnesalo.game.GameFX;
 import com.github.kirsirinnesalo.scene.util.Utils;

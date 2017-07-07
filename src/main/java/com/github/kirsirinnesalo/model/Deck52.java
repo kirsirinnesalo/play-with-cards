@@ -1,7 +1,7 @@
-package com.github.kirsirinnesalo.cards;
+package com.github.kirsirinnesalo.model;
 
-import com.github.kirsirinnesalo.cards.Card.Rank;
-import com.github.kirsirinnesalo.cards.Card.Suit;
+import com.github.kirsirinnesalo.model.Card.Rank;
+import com.github.kirsirinnesalo.model.Card.Suit;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

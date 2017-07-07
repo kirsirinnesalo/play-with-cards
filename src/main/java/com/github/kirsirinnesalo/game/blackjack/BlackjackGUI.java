@@ -1,9 +1,9 @@
-package com.github.kirsirinnesalo.cards.blackjack;
+package com.github.kirsirinnesalo.game.blackjack;
 
-import com.github.kirsirinnesalo.cards.Player;
-import com.github.kirsirinnesalo.cards.control.CardView;
-import com.github.kirsirinnesalo.cards.control.DeckPane;
-import com.github.kirsirinnesalo.cards.control.HandPane;
+import com.github.kirsirinnesalo.model.Player;
+import com.github.kirsirinnesalo.control.CardView;
+import com.github.kirsirinnesalo.control.DeckPane;
+import com.github.kirsirinnesalo.control.HandPane;
 import com.github.kirsirinnesalo.scene.util.Utils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,9 +32,9 @@ import javafx.stage.Stage;
 import java.util.Arrays;
 import java.util.OptionalInt;
 
-import static com.github.kirsirinnesalo.cards.blackjack.BlackjackGame.BLACKJACK;
-import static com.github.kirsirinnesalo.cards.blackjack.BlackjackGame.Phase.*;
-import static com.github.kirsirinnesalo.cards.blackjack.BlackjackPlayer.NOBODY;
+import static com.github.kirsirinnesalo.game.blackjack.BlackjackGame.BLACKJACK;
+import static com.github.kirsirinnesalo.game.blackjack.BlackjackGame.Phase.*;
+import static com.github.kirsirinnesalo.game.blackjack.BlackjackPlayer.NOBODY;
 
 public class BlackjackGUI extends Application {
 

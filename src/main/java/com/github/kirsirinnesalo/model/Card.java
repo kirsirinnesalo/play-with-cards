@@ -1,4 +1,4 @@
-package com.github.kirsirinnesalo.cards;
+package com.github.kirsirinnesalo.model;
 
 import java.util.Collection;
 import java.util.stream.Collectors;

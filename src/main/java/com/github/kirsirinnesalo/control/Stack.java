@@ -1,7 +1,5 @@
 package com.github.kirsirinnesalo.control;
 
-import com.github.kirsirinnesalo.cards.control.CardView;
-
 import javafx.collections.ObservableList;
 import javafx.scene.layout.StackPane;
 

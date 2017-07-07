@@ -1,7 +1,7 @@
-package com.github.kirsirinnesalo.cards.control;
+package com.github.kirsirinnesalo.control;
 
-import com.github.kirsirinnesalo.cards.Card;
-import com.github.kirsirinnesalo.cards.Hand;
+import com.github.kirsirinnesalo.model.Card;
+import com.github.kirsirinnesalo.model.Hand;
 import com.github.kirsirinnesalo.scene.control.BorderedTitledPane;
 
 import javafx.beans.property.BooleanProperty;
@@ -14,8 +14,10 @@ import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class HandPane extends StackPane {
-    private final Hand hand;
     private final Pane cardPane;
     private final int cardWidth;
     private final int cardHeight;
@@ -23,7 +25,6 @@ public class HandPane extends StackPane {
     private double translateX;
 
     public HandPane(String title, Hand hand, int cardWidth, int cardHeight) {
-        this.hand = hand;
         this.cardWidth = cardWidth;
         this.cardHeight = cardHeight;
         this.translateX = cardWidth * 0.2;
@@ -62,7 +63,7 @@ public class HandPane extends StackPane {
                 shiftOverlap(cardView);
                 StackPane.setAlignment(cardView, Pos.BOTTOM_LEFT);
             } else if (change.wasRemoved()) {
-                refreshPlayerHand();
+                removeCardViews(change.getRemoved());
             }
         }
     }
@@ -80,10 +81,15 @@ public class HandPane extends StackPane {
         cardList.add(cardView);
     }
 
-    private void refreshPlayerHand() {
-        ObservableList<Node> cards = cardPane.getChildren();
-        cards.clear();
-        hand.forEach(card -> cards.add(new CardView(card, cardWidth, cardHeight)));
+    private void removeCardViews(List<? extends Card> removedCards) {
+        ObservableList<Node> cardList = cardPane.getChildren();
+        List<CardView> viewsToBeRemoved = new ArrayList<>();
+        removedCards.forEach(card -> cardList.forEach(node -> {
+            CardView cardView = (CardView) node;
+            if (cardView.getCard().equals(card)) {
+                viewsToBeRemoved.add(cardView);
+            }
+        }));
+        cardList.removeAll(viewsToBeRemoved);
     }
-
 }

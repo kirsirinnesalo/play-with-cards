@@ -1,8 +1,8 @@
-package com.github.kirsirinnesalo.cards.demo;
+package com.github.kirsirinnesalo.hello.demo;
 
-import com.github.kirsirinnesalo.cards.Card;
-import com.github.kirsirinnesalo.cards.control.CardView;
-import com.github.kirsirinnesalo.cards.control.DraggableCardView;
+import com.github.kirsirinnesalo.model.Card;
+import com.github.kirsirinnesalo.control.CardView;
+import com.github.kirsirinnesalo.control.DraggableCardView;
 
 import javafx.application.Application;
 import javafx.scene.Scene;

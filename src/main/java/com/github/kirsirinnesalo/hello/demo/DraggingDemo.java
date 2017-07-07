@@ -1,4 +1,4 @@
-package com.github.kirsirinnesalo.hello;
+package com.github.kirsirinnesalo.hello.demo;
 
 import javafx.application.Application;
 import javafx.application.Platform;

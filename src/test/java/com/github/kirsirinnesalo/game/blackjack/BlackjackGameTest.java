@@ -1,12 +1,12 @@
-package com.github.kirsirinnesalo.cards.blackjack;
+package com.github.kirsirinnesalo.game.blackjack;
 
-import com.github.kirsirinnesalo.cards.Card;
+import com.github.kirsirinnesalo.model.Card;
 
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
 
-import static com.github.kirsirinnesalo.cards.blackjack.BlackjackPlayer.NOBODY;
+import static com.github.kirsirinnesalo.game.blackjack.BlackjackPlayer.NOBODY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

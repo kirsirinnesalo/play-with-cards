@@ -1,8 +1,8 @@
-package com.github.kirsirinnesalo.cards.blackjack;
+package com.github.kirsirinnesalo.game.blackjack;
 
-import com.github.kirsirinnesalo.cards.Card;
-import com.github.kirsirinnesalo.cards.Hand;
-import com.github.kirsirinnesalo.cards.Player;
+import com.github.kirsirinnesalo.model.Card;
+import com.github.kirsirinnesalo.model.Hand;
+import com.github.kirsirinnesalo.model.Player;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -13,9 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.LongAdder;
 
-import static com.github.kirsirinnesalo.cards.Card.Rank.ACE;
-import static com.github.kirsirinnesalo.cards.blackjack.BlackjackGame.BLACKJACK;
-import static com.github.kirsirinnesalo.cards.blackjack.BlackjackGame.FACE_CARD_VALUE;
+import static com.github.kirsirinnesalo.model.Card.Rank.ACE;
+import static com.github.kirsirinnesalo.game.blackjack.BlackjackGame.BLACKJACK;
+import static com.github.kirsirinnesalo.game.blackjack.BlackjackGame.FACE_CARD_VALUE;
 
 public class BlackjackPlayer extends Player {
     static final BlackjackPlayer NOBODY = new BlackjackPlayer("Nobody", 0);

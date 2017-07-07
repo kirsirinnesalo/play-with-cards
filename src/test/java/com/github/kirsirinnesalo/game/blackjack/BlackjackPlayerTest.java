@@ -1,8 +1,8 @@
-package com.github.kirsirinnesalo.cards.blackjack;
+package com.github.kirsirinnesalo.game.blackjack;
 
-import com.github.kirsirinnesalo.cards.Card;
-import com.github.kirsirinnesalo.cards.Card.Rank;
-import com.github.kirsirinnesalo.cards.Card.Suit;
+import com.github.kirsirinnesalo.model.Card;
+import com.github.kirsirinnesalo.model.Card.Rank;
+import com.github.kirsirinnesalo.model.Card.Suit;
 
 import org.junit.jupiter.api.Test;
 

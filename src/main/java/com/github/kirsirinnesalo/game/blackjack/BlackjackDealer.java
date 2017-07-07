@@ -1,4 +1,4 @@
-package com.github.kirsirinnesalo.cards.blackjack;
+package com.github.kirsirinnesalo.game.blackjack;
 
 
 class BlackjackDealer extends BlackjackPlayer {

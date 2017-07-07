@@ -1,11 +1,11 @@
-package com.github.kirsirinnesalo.cards.control;
+package com.github.kirsirinnesalo.control;
 
-import com.github.kirsirinnesalo.cards.Card;
+import com.github.kirsirinnesalo.model.Card;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-import static com.github.kirsirinnesalo.cards.Card.Rank.JOKER;
+import static com.github.kirsirinnesalo.model.Card.Rank.JOKER;
 
 public class CardView extends ImageView {
 

@@ -1,6 +1,6 @@
-package com.github.kirsirinnesalo.cards.blackjack;
+package com.github.kirsirinnesalo.game.blackjack;
 
-import com.github.kirsirinnesalo.cards.Player;
+import com.github.kirsirinnesalo.model.Player;
 import com.github.kirsirinnesalo.cli.Console;
 
 import java.util.Scanner;

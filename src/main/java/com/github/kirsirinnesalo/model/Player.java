@@ -1,4 +1,4 @@
-package com.github.kirsirinnesalo.cards;
+package com.github.kirsirinnesalo.model;
 
 public class Player {
     private Hand hand;

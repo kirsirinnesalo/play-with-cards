@@ -1,7 +1,7 @@
-package com.github.kirsirinnesalo.cards.control;
+package com.github.kirsirinnesalo.control;
 
-import com.github.kirsirinnesalo.cards.Card;
-import com.github.kirsirinnesalo.cards.Deck;
+import com.github.kirsirinnesalo.model.Card;
+import com.github.kirsirinnesalo.model.Deck;
 
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
