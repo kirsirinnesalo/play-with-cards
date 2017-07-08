@@ -4,8 +4,6 @@ import com.github.kirsirinnesalo.control.CardView;
 import com.github.kirsirinnesalo.control.Stack;
 import com.github.kirsirinnesalo.game.GameFX;
 import com.github.kirsirinnesalo.model.Card;
-import com.github.kirsirinnesalo.model.Card.Rank;
-import com.github.kirsirinnesalo.model.Card.Suit;
 import com.github.kirsirinnesalo.model.Deck52;
 import com.github.kirsirinnesalo.scene.util.Utils;
 
@@ -29,15 +27,15 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
-public class AcesUp extends GameFX {
+public class Eternity extends GameFX {
 
     private static final int TABLE_WIDTH = 600;
     private static final int TABLE_HEIGHT = 400;
@@ -75,7 +73,7 @@ public class AcesUp extends GameFX {
         Stack sourceStack = (Stack) cardView.getParent();
         Stack targetStack = (Stack) event.getGestureTarget();
 
-        if (targetStack.isEmpty()) {
+        if (isTargetStackOnLeft(sourceStack, targetStack) && topCardRankEqual(targetStack, cardView)) {
             sourceStack.giveCard();
             targetStack.addCard(cardView);
         }
@@ -84,13 +82,21 @@ public class AcesUp extends GameFX {
     private Stack deck;
     private List<Stack> stacks;
     private Stack discardPile;
-    private Text gameLostMessage;
+    private int cardsInGame;
     private Text gameWonMessage;
     private Button newGameButton;
 
+    private boolean topCardRankEqual(Stack targetStack, CardView cardView) {
+        return topCardIn(targetStack).rank.equals(cardView.getCard().rank);
+    }
+
+    private boolean isTargetStackOnLeft(Stack sourceStack, Stack targetStack) {
+        return Integer.valueOf(sourceStack.getId()) > Integer.valueOf(targetStack.getId());
+    }
+
     @Override
     protected String getTitle() {
-        return "Aces Up";
+        return "Ikuisuus / Eternity";
     }
 
     @Override
@@ -108,33 +114,10 @@ public class AcesUp extends GameFX {
         AnchorPane table = new AnchorPane();
         table.setBackground(Utils.getBackgroundWith(Color.DARKSLATEGRAY));
         table.getChildren().addAll(createDeck(), createStacks(), createDiscardPile(),
-                createGameLostMessage(), createGameWonMessage(), createNewGameButton());
-        hide(gameLostMessage, gameWonMessage, newGameButton);
+                createGameWonMessage(), createNewGameButton());
+        discardPile.setVisible(false);
+        enableGame();
         return table;
-    }
-
-    private Text createGameLostMessage() {
-        gameLostMessage = new Text("You lost.");
-        messageLayout(gameLostMessage);
-        gameLostMessage.setFill(Color.BLACK);
-        return gameLostMessage;
-    }
-
-    private Text createGameWonMessage() {
-        gameWonMessage = new Text("You won!");
-        messageLayout(gameWonMessage);
-        gameWonMessage.setStyle(
-                " -fx-fill: linear-gradient(from 0% 0% to 100% 200%, repeat, aqua 0%, red 50%);\n" +
-                        " -fx-stroke: black;\n" +
-                        " -fx-stroke-width: 1;");
-        return gameWonMessage;
-    }
-
-    private void messageLayout(Text message) {
-        message.setLayoutX(100);
-        message.setLayoutY(200);
-        message.setTextAlignment(TextAlignment.CENTER);
-        message.setFont(Font.font("Arial Bold", 100));
     }
 
     private Button createNewGameButton() {
@@ -150,16 +133,6 @@ public class AcesUp extends GameFX {
         return newGameButton;
     }
 
-    private void disableGame() {
-        deck.setDisable(true);
-        deck.setOpacity(0.4);
-        stacks.forEach(stack -> {
-            stack.setDisable(true);
-            stack.setOpacity(0.4);
-        });
-        show(newGameButton);
-    }
-
     private void enableGame() {
         deck.setDisable(false);
         deck.setOpacity(1);
@@ -167,7 +140,29 @@ public class AcesUp extends GameFX {
             stack.setDisable(false);
             stack.setOpacity(1);
         });
-        hide(gameWonMessage, gameLostMessage, newGameButton);
+        gameWonMessage.setVisible(false);
+        newGameButton.setVisible(false);
+    }
+
+    private void setUpDeck() {
+        ObservableList<Card> cards = new Deck52().getCards();
+        cardsInGame = cards.size();
+        Collections.shuffle(cards);
+        cards.forEach(card -> deck.addCard(createCardView(card)));
+        deck.getCards().forEach(CardView::turnFaceDown);
+    }
+
+    private Text createGameWonMessage() {
+        gameWonMessage = new Text("You won!");
+        gameWonMessage.setLayoutX(100);
+        gameWonMessage.setLayoutY(200);
+        gameWonMessage.setTextAlignment(TextAlignment.CENTER);
+        gameWonMessage.setFont(Font.font("Arial Bold", 100));
+        gameWonMessage.setStyle(
+                " -fx-fill: linear-gradient(from 0% 0% to 100% 200%, repeat, aqua 0%, red 50%);\n" +
+                        " -fx-stroke: black;\n" +
+                        " -fx-stroke-width: 1;");
+        return gameWonMessage;
     }
 
     private Node createDeck() {
@@ -176,13 +171,6 @@ public class AcesUp extends GameFX {
         setUpDeck();
         deck.setOnMouseClicked(e -> deal());
         return deck;
-    }
-
-    private void setUpDeck() {
-        ObservableList<Card> cards = new Deck52().getCards();
-        Collections.shuffle(cards);
-        cards.forEach(card -> deck.addCard(createCardView(card)));
-        deck.getCards().forEach(CardView::turnFaceDown);
     }
 
     private CardView createCardView(Card card) {
@@ -203,60 +191,44 @@ public class AcesUp extends GameFX {
                 .collect(toList()));
         stacks.forEach(stack -> {
             makeDragTarget(stack);
-            stack.getCards().addListener(getChangeListenerFor(stack, 5));
+            stack.getCards().addListener(getChangeListenerFor(stack, 2));
             stack.setOnMouseClicked(event -> {
                 if (isDoubleClick(event)) {
                     Card myTopCard = topCardIn(stack);
-                    if (existsStackTopGreaterThan(myTopCard)) {
-                        discardPile.addCard(stack.giveCard());
+                    if (everyStackTopEquals(myTopCard)) {
+                        stacks.forEach(s -> discardPile.addCard(s.giveCard()));
+                        checkWin();
                     }
                 }
-                checkIfGameOver();
             });
         });
         group.getChildren().addAll(stacks);
         return group;
     }
 
-    private void checkIfGameOver() {
-        if (deck.isEmpty()) {
-            if (stacks.stream().allMatch(this::stackOnlyCardIsAce)) {
-                gameOver(gameWonMessage);
-            } else if (!movesLeft()) {
-                gameOver(gameLostMessage);
-            }
+    private void checkWin() {
+        if (discardPile.getCards().size() == cardsInGame) {
+            gameOver();
         }
     }
 
-    private void gameOver(Node messageNode) {
+    private void gameOver() {
         disableGame();
-        show(messageNode);
+        gameWonMessage.setVisible(true);
     }
 
-    private void show(Node... nodes) {
-        setVisible(true, nodes);
-    }
-
-    private void hide(Node... nodes) {
-        setVisible(false, nodes);
-    }
-
-    private void setVisible(boolean visible, Node... nodes) {
-        Arrays.stream(nodes).forEach(node -> node.setVisible(visible));
-    }
-
-    private boolean movesLeft() {
-        return stacks.stream().anyMatch(stack -> existsStackTopGreaterThan(topCardIn(stack)));
-    }
-
-    private boolean stackOnlyCardIsAce(Stack stack) {
-        List<CardView> cards = stack.getCards();
-        return cards.size() == 1 && cards.get(0).getCard().isAce();
+    private void disableGame() {
+        deck.setDisable(true);
+        deck.setOpacity(0.4);
+        stacks.forEach(stack -> {
+            stack.setDisable(true);
+            stack.setOpacity(0.4);
+        });
+        newGameButton.setVisible(true);
     }
 
     private Node createDiscardPile() {
-        discardPile = createStack("discard", 0, 0);
-        hide(discardPile);
+        discardPile = createStack("discard", 580, 45);
         return discardPile;
     }
 
@@ -272,20 +244,14 @@ public class AcesUp extends GameFX {
         return stack;
     }
 
-    private boolean existsStackTopGreaterThan(Card myTopCard) {
-        return stacks.stream()
-                .filter(otherStack -> topCardIn(otherStack).suit.equals(myTopCard.suit))
-                .anyMatch(otherStack -> {
-                    Card otherCard = topCardIn(otherStack);
-                    return !myTopCard.isAce() && !otherCard.rank.equals(Rank.JOKER) &&
-                            (otherCard.isAce() || otherCard.rank.numericValue() > myTopCard.rank.numericValue());
-                });
+    private boolean everyStackTopEquals(Card myTopCard) {
+        return stacks.stream().allMatch(otherStack -> topCardIn(otherStack).rank.equals(myTopCard.rank));
     }
 
     private Card topCardIn(Stack stack) {
         return stack.getCards().stream()
                 .reduce((a, b) -> b)
-                .orElse(new CardView(new Card(Rank.JOKER, Suit.JOKER)))
+                .orElse(new CardView(new Card(Card.Rank.JOKER, Card.Suit.JOKER)))
                 .getCard();
     }
 
@@ -293,42 +259,43 @@ public class AcesUp extends GameFX {
         return event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2;
     }
 
+    private void makeDragTarget(Stack stack) {
+        stack.setOnDragOver(onDragOverHandler);
+        stack.setOnDragDropped(onDragDroppedHandler);
+    }
+
+    private void makeDraggable(CardView cardView) {
+        cardView.setOnDragDetected(onDragDetectedHandler);
+    }
+
     private ListChangeListener<CardView> getChangeListenerFor(Stack stack, double shift) {
         return change -> {
             if (change.next()) {
+                ObservableList<Node> cardList = stack.getChildren();
                 if (change.wasAdded()) {
-                    addCardsTo(stack, change.getAddedSubList(), shift);
+                    change.getAddedSubList().forEach(card -> {
+                        Platform.runLater(() -> {
+                            if (!cardList.contains(card)) {
+                                cardList.add(card);
+                                shiftOverlap(stack, card, shift);
+                            }
+                        });
+                    });
+                    hideBackgroundFrom(stack);
                 } else if (change.wasRemoved()) {
-                    removeCardsFrom(stack, change.getRemoved());
+                    List<? extends CardView> removed = change.getRemoved();
+                    Platform.runLater(() -> {
+                        List<Node> toBeRemoved = cardList.stream()
+                                .filter(removed::contains)
+                                .collect(toList());
+                        cardList.removeAll(toBeRemoved);
+                        if (cardList.size() == 0) {
+                            viewEmptyBackgroundFor(stack);
+                        }
+                    });
                 }
             }
         };
-    }
-
-    private void removeCardsFrom(Stack stack, List<? extends CardView> cardsToRemove) {
-        ObservableList<Node> cardList = stack.getChildren();
-        Platform.runLater(() -> {
-            List<Node> toBeRemoved = cardList.stream()
-                    .filter(cardsToRemove::contains)
-                    .collect(toList());
-            cardList.removeAll(toBeRemoved);
-            if (cardList.size() == 0) {
-                viewEmptyBackgroundFor(stack);
-            }
-        });
-    }
-
-    private void addCardsTo(Stack stack, List<? extends CardView> cardsToAdd, double shift) {
-        ObservableList<Node> cardList = stack.getChildren();
-        cardsToAdd.forEach(card -> {
-            Platform.runLater(() -> {
-                if (!cardList.contains(card)) {
-                    cardList.add(card);
-                    shiftOverlap(stack, card, shift);
-                }
-            });
-        });
-        hideBackgroundFrom(stack);
     }
 
     private void shiftOverlap(Stack stack, CardView cardView, double shift) {
@@ -354,15 +321,6 @@ public class AcesUp extends GameFX {
         stack.setBackground(EMPTY_STACK_BACKGROUND);
     }
 
-    private void makeDragTarget(Stack stack) {
-        stack.setOnDragOver(onDragOverHandler);
-        stack.setOnDragDropped(onDragDroppedHandler);
-    }
-
-    private void makeDraggable(CardView cardView) {
-        cardView.setOnDragDetected(onDragDetectedHandler);
-    }
-
     private void deal() {
         if (deck.getCards().size() >= stacks.size()) {
             stacks.forEach(stack -> {
@@ -370,6 +328,17 @@ public class AcesUp extends GameFX {
                 card.turnFaceUp();
                 stack.addCard(card);
             });
+        } else if (stacks.stream().anyMatch(stack -> !stack.isEmpty())) {
+            new ArrayDeque<>(stacks)
+                    .descendingIterator()
+                    .forEachRemaining(stack -> {
+                        new ArrayDeque<>(stack.getCards())
+                                .descendingIterator()
+                                .forEachRemaining(card -> deck.addCard(card));
+                        //deck.addAll(stack.getCards());
+                        stack.clear();
+                    });
+            deck.getCards().forEach(CardView::turnFaceDown);
         }
     }
 

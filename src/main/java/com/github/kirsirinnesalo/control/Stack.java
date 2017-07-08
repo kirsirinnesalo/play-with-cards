@@ -8,6 +8,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.layout.StackPane;
 
+import java.util.List;
+
 public class Stack extends StackPane {
 
     private ObservableList<CardView> cards;
@@ -43,5 +45,9 @@ public class Stack extends StackPane {
 
     public void clear() {
         this.cards.clear();
+    }
+
+    public void addAll(List<CardView> cards) {
+        this.cards.addAll(cards);
     }
 }
