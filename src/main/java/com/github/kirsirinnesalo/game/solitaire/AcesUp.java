@@ -328,7 +328,7 @@ public class AcesUp extends GameFX {
                 }
             });
         });
-        hideBackgroundFrom(deck);
+        hideBackgroundFrom(stack);
     }
 
     private void shiftOverlap(Stack stack, CardView cardView, double shift) {
