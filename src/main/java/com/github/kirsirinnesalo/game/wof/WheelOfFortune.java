@@ -100,22 +100,22 @@ public class WheelOfFortune extends GameFX {
     private String usedLetters = "";
 
     @Override
-    protected String getTitle() {
+    public String getTitle() {
         return "Onnenpyörä";
     }
 
     @Override
-    protected double getWidth() {
+    public double getWidth() {
         return 800;
     }
 
     @Override
-    protected double getHeight() {
+    public double getHeight() {
         return 600;
     }
 
     @Override
-    protected Parent createGameTable() {
+    public Parent createGameTable() {
         AnchorPane table = new AnchorPane();
         table.getChildren().addAll(createTitle(), createPlayers(), createPhrase(), createWheel(),
                 createConsonantsBox(), createVowelBox(), createResolvePhraseField(), createButtons(),

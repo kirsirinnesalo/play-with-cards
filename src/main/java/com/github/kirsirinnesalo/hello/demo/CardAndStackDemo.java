@@ -38,12 +38,12 @@ public class CardAndStackDemo extends GameFX {
     private static final Background EMPTY_STACK_BACKGROUND = Utils.getBackgroundWith(Color.LIGHTYELLOW);
 
     @Override
-    protected String getTitle() {
+    public String getTitle() {
         return "Stacking Cards Demo";
     }
 
     @Override
-    protected Parent createGameTable() {
+    public Parent createGameTable() {
         Stack stack1 = getStack(200, 100);
         ObservableList<Card> cards = new Deck52().getCards();
         Collections.shuffle(cards);
