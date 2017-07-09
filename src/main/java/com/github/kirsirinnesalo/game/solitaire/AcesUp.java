@@ -69,6 +69,12 @@ public class AcesUp extends GameFX {
         }
         event.consume();
     };
+    private Stack deck;
+    private List<Stack> stacks;
+    private Stack discardPile;
+    private Text gameLostMessage;
+    private Text gameWonMessage;
+    private Button newGameButton;
     private final EventHandler<DragEvent> onDragDroppedHandler = event -> {
         CardView cardView = (CardView) event.getGestureSource();
 
@@ -78,15 +84,9 @@ public class AcesUp extends GameFX {
         if (targetStack.isEmpty()) {
             sourceStack.giveCard();
             targetStack.addCard(cardView);
+            checkIfGameOver();
         }
     };
-
-    private Stack deck;
-    private List<Stack> stacks;
-    private Stack discardPile;
-    private Text gameLostMessage;
-    private Text gameWonMessage;
-    private Button newGameButton;
 
     @Override
     protected String getTitle() {
@@ -246,7 +246,9 @@ public class AcesUp extends GameFX {
     }
 
     private boolean movesLeft() {
-        return stacks.stream().anyMatch(stack -> existsStackTopGreaterThan(topCardIn(stack)));
+        return stacks.stream().anyMatch(stack -> existsStackTopGreaterThan(topCardIn(stack)))
+                || (stacks.stream().anyMatch(Stack::isEmpty)
+                && stacks.stream().anyMatch(stack -> stack.getCards().size() > 1));
     }
 
     private boolean stackOnlyCardIsAce(Stack stack) {
@@ -364,13 +366,14 @@ public class AcesUp extends GameFX {
     }
 
     private void deal() {
-        if (deck.getCards().size() >= stacks.size()) {
-            stacks.forEach(stack -> {
+        stacks.forEach(stack -> {
+            if (!deck.isEmpty()) {
                 CardView card = deck.giveCard();
                 card.turnFaceUp();
                 stack.addCard(card);
-            });
-        }
+            }
+        });
+        checkIfGameOver();
     }
 
 }
