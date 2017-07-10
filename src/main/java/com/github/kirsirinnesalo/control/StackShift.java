@@ -1,4 +1,4 @@
-package com.github.kirsirinnesalo.game.solitaire;
+package com.github.kirsirinnesalo.control;
 
 import com.github.kirsirinnesalo.control.CardView;
 import com.github.kirsirinnesalo.control.Stack;

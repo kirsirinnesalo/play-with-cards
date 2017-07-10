@@ -1,8 +1,5 @@
 package com.github.kirsirinnesalo.control;
 
-import com.github.kirsirinnesalo.game.solitaire.ShiftDown;
-import com.github.kirsirinnesalo.game.solitaire.StackShift;
-
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;

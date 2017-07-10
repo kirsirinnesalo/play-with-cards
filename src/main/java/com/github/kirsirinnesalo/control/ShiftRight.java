@@ -1,6 +1,4 @@
-package com.github.kirsirinnesalo.game.solitaire;
-
-import com.github.kirsirinnesalo.control.CardView;
+package com.github.kirsirinnesalo.control;
 
 public class ShiftRight extends StackShift {
     public ShiftRight(double translateAmount) {

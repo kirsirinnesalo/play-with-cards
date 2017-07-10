@@ -1,6 +1,7 @@
 package com.github.kirsirinnesalo.game.solitaire;
 
 import com.github.kirsirinnesalo.control.CardView;
+import com.github.kirsirinnesalo.control.ShiftDown;
 import com.github.kirsirinnesalo.control.Stack;
 import com.github.kirsirinnesalo.model.Card;
 import com.github.kirsirinnesalo.model.Card.Rank;
