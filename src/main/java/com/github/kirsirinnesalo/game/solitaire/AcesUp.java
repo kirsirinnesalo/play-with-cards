@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
-public class AcesUp extends SolitaireGame {
+public class AcesUp extends SolitaireGameApplication {
 
     private static final int TABLE_WIDTH = 600;
     private static final int TABLE_HEIGHT = 400;

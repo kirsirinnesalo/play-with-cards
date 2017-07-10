@@ -4,7 +4,7 @@ import com.github.kirsirinnesalo.model.Card;
 import com.github.kirsirinnesalo.model.Deck52;
 import com.github.kirsirinnesalo.control.CardView;
 import com.github.kirsirinnesalo.control.Stack;
-import com.github.kirsirinnesalo.game.GameFX;
+import com.github.kirsirinnesalo.game.FXGameApplication;
 import com.github.kirsirinnesalo.scene.util.Utils;
 
 import javafx.application.Platform;
@@ -30,7 +30,7 @@ import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
 
-public class CardAndStackDemo extends GameFX {
+public class CardAndStackDemo extends FXGameApplication {
 
     private static final Border EMPTY_STACK_BORDER = new Border(
             new BorderStroke(Color.DIMGRAY, BorderStrokeStyle.SOLID, new CornerRadii(3), new BorderWidths(1))

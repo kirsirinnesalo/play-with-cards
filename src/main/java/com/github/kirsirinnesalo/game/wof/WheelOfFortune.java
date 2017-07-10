@@ -1,6 +1,6 @@
 package com.github.kirsirinnesalo.game.wof;
 
-import com.github.kirsirinnesalo.game.GameFX;
+import com.github.kirsirinnesalo.game.FXGameApplication;
 
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
-public class WheelOfFortune extends GameFX {
+public class WheelOfFortune extends FXGameApplication {
 
     private static final List<String> labelTexts = new ArrayList<>();
     private static final List<String> phrases = new ArrayList<>();

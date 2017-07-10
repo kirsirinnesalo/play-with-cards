@@ -2,7 +2,7 @@ package com.github.kirsirinnesalo.game.solitaire;
 
 import com.github.kirsirinnesalo.control.CardView;
 import com.github.kirsirinnesalo.control.Stack;
-import com.github.kirsirinnesalo.game.GameFX;
+import com.github.kirsirinnesalo.game.FXGameApplication;
 import com.github.kirsirinnesalo.model.Card;
 import com.github.kirsirinnesalo.model.Deck52;
 import com.github.kirsirinnesalo.scene.util.Utils;
@@ -30,7 +30,7 @@ import java.util.List;
 import static com.github.kirsirinnesalo.control.Stack.EMPTY_STACK_BACKGROUND;
 import static com.github.kirsirinnesalo.control.Stack.EMPTY_STACK_BORDER;
 
-public abstract class SolitaireGame extends GameFX {
+public abstract class SolitaireGameApplication extends FXGameApplication {
 
     private static final int CARD_WIDTH = 90;
     private static final int CARD_HEIGHT = 120;
