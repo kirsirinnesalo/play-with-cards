@@ -69,27 +69,38 @@ public class Stack extends StackPane {
         this.cards.addAll(cards);
     }
 
-    private void addCards(List<? extends CardView> cardsToAdd) {
-        ObservableList<Node> cardList = getChildren();
-        cardsToAdd.forEach(card -> {
-            Platform.runLater(() -> {
-                if (!cardList.contains(card)) {
-                    cardList.add(card);
-                    shift.shiftOverlap(this,card);
+    private ListChangeListener<CardView> getChangeListener() {
+        return change -> {
+            if (change.next()) {
+                if (change.wasAdded()) {
+                    addCardNodes(change.getAddedSubList());
+                } else if (change.wasRemoved()) {
+                    removeCardNodes(change.getRemoved());
                 }
-            });
-        });
+            }
+        };
+    }
+
+    private void addCardNodes(List<? extends CardView> cardsToAdd) {
+        ObservableList<Node> cardList = getChildren();
+        cardsToAdd.forEach(card -> Platform.runLater(() -> {
+            if (!cardList.contains(card)) {
+                cardList.add(card);
+                shift.shiftOverlap(this,card);
+            }
+        }));
         hideBackgroundFrom();
     }
 
-    private void removeCards(List<? extends CardView> cardsToRemove) {
-        ObservableList<Node> cardList = getChildren();
+    private void removeCardNodes(List<? extends CardView> cardsToRemove) {
         Platform.runLater(() -> {
-            List<Node> toBeRemoved = cardList.stream()
+            List<Node> toBeRemoved = getChildren().stream()
+                    .filter(CardView.class::isInstance)
+                    .map(CardView.class::cast)
                     .filter(cardsToRemove::contains)
                     .collect(toList());
-            cardList.removeAll(toBeRemoved);
-            if (cardList.size() == 0) {
+            getChildren().removeAll(toBeRemoved);
+            if (getChildren().size() == 0) {
                 viewEmptyBackground();
             }
         });
@@ -103,18 +114,6 @@ public class Stack extends StackPane {
     private void hideBackgroundFrom() {
         setBorder(Border.EMPTY);
         setBackground(Background.EMPTY);
-    }
-
-    private ListChangeListener<CardView> getChangeListener() {
-        return change -> {
-            if (change.next()) {
-                if (change.wasAdded()) {
-                    addCards(change.getAddedSubList());
-                } else if (change.wasRemoved()) {
-                    removeCards(change.getRemoved());
-                }
-            }
-        };
     }
 
 }
