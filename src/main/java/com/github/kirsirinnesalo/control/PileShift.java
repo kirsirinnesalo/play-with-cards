@@ -1,16 +1,13 @@
 package com.github.kirsirinnesalo.control;
 
-import com.github.kirsirinnesalo.control.CardView;
-import com.github.kirsirinnesalo.control.Stack;
-
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 
-public abstract class StackShift {
+public abstract class PileShift {
     private double amount;
     private double translate;
 
-    public StackShift(double translateAmount) {
+    public PileShift(double translateAmount) {
         this.amount = translateAmount;
     }
 
@@ -20,8 +17,8 @@ public abstract class StackShift {
 
     public abstract void shift(CardView cardView);
 
-    public void shiftOverlap(Stack stack, CardView cardView) {
-        ObservableList<Node> cardList = stack.getChildren();
+    void shiftOverlap(Pile pile, CardView cardView) {
+        ObservableList<Node> cardList = pile.getChildren();
         int cardCount = cardList.size();
         if (cardCount > 0) {
             if (cardCount > 1) {

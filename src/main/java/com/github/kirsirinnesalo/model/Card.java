@@ -42,6 +42,14 @@ public class Card implements Comparable<Card> {
         return isAce(rank);
     }
 
+    public boolean isSmallerThan(Rank that) {
+        return this.rank.compareTo(that) < 0;
+    }
+
+    public boolean isGreaterThan(Rank that) {
+        return this.rank.compareTo(that) > 0;
+    }
+
     @Override
     public int compareTo(Card otherCard) {
         return rank.compareTo(otherCard.rank);
@@ -139,6 +147,14 @@ public class Card implements Comparable<Card> {
                 text = name().toLowerCase();
             }
             return text;
+        }
+
+        public Rank next() {
+            return values()[(this.ordinal()+1) % values().length];
+        }
+
+        public Rank previous() {
+            return values()[(this.ordinal()-1) % values().length];
         }
     }
 

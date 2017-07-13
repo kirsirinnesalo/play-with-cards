@@ -19,7 +19,7 @@ class BlackjackGameTest {
         new BlackjackGame().hit(testPlayer);
         int afterDealHandSize = testPlayer.getHand().size();
         assertTrue(initialHandSize < afterDealHandSize,
-                "Expected player card count bigger after deal. Was <" + afterDealHandSize + ">");
+                "Expected player card count bigger after hit. Was <" + afterDealHandSize + ">");
 
     }
 

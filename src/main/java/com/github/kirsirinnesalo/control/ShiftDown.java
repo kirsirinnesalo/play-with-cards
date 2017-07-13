@@ -1,6 +1,6 @@
 package com.github.kirsirinnesalo.control;
 
-public class ShiftDown extends StackShift {
+public class ShiftDown extends PileShift {
     public ShiftDown(double translateAmount) {
         super(translateAmount);
     }

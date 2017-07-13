@@ -1,8 +1,8 @@
 package com.github.kirsirinnesalo.game.solitaire;
 
 import com.github.kirsirinnesalo.control.CardView;
+import com.github.kirsirinnesalo.control.Pile;
 import com.github.kirsirinnesalo.control.ShiftDown;
-import com.github.kirsirinnesalo.control.Stack;
 import com.github.kirsirinnesalo.model.Card;
 import com.github.kirsirinnesalo.model.Card.Rank;
 
@@ -10,12 +10,13 @@ import javafx.event.EventHandler;
 import javafx.scene.input.DragEvent;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
-public class AcesUp extends SolitaireGameApplication {
+public class AcesUp extends SolitaireApplication {
 
     private static final int TABLE_WIDTH = 600;
     private static final int TABLE_HEIGHT = 400;
@@ -36,28 +37,55 @@ public class AcesUp extends SolitaireGameApplication {
     }
 
     @Override
-    public List<Stack> createStacks() {
-        List<Stack> stacks = new ArrayList<>(4);
-        stacks.addAll(Stream.of(
-                createStack("1", 155, 45),
-                createStack("2", 255, 45),
-                createStack("3", 355, 45),
-                createStack("4", 455, 45))
+    public List<Pile> createTableauPiles() {
+        List<Pile> piles = new ArrayList<>(4);
+        piles.addAll(Stream.of(
+                createPile("1", 155, 45),
+                createPile("2", 255, 45),
+                createPile("3", 355, 45),
+                createPile("4", 455, 45))
                 .collect(toList()));
-        stacks.forEach(stack -> {
-            makeDragTarget(stack);
-            stack.setShift(new ShiftDown(5));
-            stack.setOnMouseClicked(event -> {
+        piles.forEach(pile -> {
+            makeDragTarget(pile);
+            pile.setShift(new ShiftDown(5));
+            pile.setOnMouseClicked(event -> {
                 if (isDoubleClick(event)) {
-                    Card myTopCard = topCardIn(stack);
-                    if (existsStackTopGreaterThan(myTopCard)) {
-                        getDiscardPile().addCard(stack.giveCard());
+                    Card myTopCard = pile.getTopCard();
+                    if (existsPileTopGreaterThan(myTopCard)) {
+                        getDiscardPile().addCard(pile.giveCard());
                     }
                 }
                 checkIfGameOver();
             });
         });
-        return stacks;
+        return piles;
+    }
+
+    @Override
+    public List<Pile> createFoundationPiles() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<Pile> createReservePiles() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public void deal() {
+        //no initial deal on tableau
+    }
+
+    @Override
+    public void hit() {
+        getTableauPiles().forEach(pile -> {
+            if (!getStock().isEmpty()) {
+                CardView card = getStock().giveCard();
+                card.turnFaceUp();
+                pile.addCard(card);
+            }
+        });
+        checkIfGameOver();
     }
 
     @Override
@@ -65,32 +93,19 @@ public class AcesUp extends SolitaireGameApplication {
         return event -> {
             CardView cardView = (CardView) event.getGestureSource();
 
-            Stack sourceStack = (Stack) cardView.getParent();
-            Stack targetStack = (Stack) event.getGestureTarget();
+            Pile sourcePile = (Pile) cardView.getParent();
+            Pile targetPile = (Pile) event.getGestureTarget();
 
-            if (targetStack.isEmpty()) {
-                sourceStack.giveCard();
-                targetStack.addCard(cardView);
+            if (targetPile.isEmpty()) {
+                sourcePile.giveCard();
+                targetPile.addCard(cardView);
             }
         };
     }
 
-    @Override
-    public void deal() {
-        getStacks().forEach(stack -> {
-            if (!getDeck().isEmpty()) {
-                CardView card = getDeck().giveCard();
-                card.turnFaceUp();
-                stack.addCard(card);
-            }
-        });
-        checkIfGameOver();
-    }
-
-    @Override
-    public void checkIfGameOver() {
-        if (getDeck().isEmpty()) {
-            if (getStacks().stream().allMatch(this::stackOnlyCardIsAce)) {
+    private void checkIfGameOver() {
+        if (getStock().isEmpty()) {
+            if (getTableauPiles().stream().allMatch(this::pileOnlyCardIsAce)) {
                 gameWon();
             } else if (!movesLeft()) {
                 gameLost();
@@ -99,21 +114,33 @@ public class AcesUp extends SolitaireGameApplication {
     }
 
     private boolean movesLeft() {
-        return getStacks().stream().anyMatch(stack -> existsStackTopGreaterThan(topCardIn(stack)))
-                || (getStacks().stream().anyMatch(Stack::isEmpty)
-                && getStacks().stream().anyMatch(stack -> stack.getCards().size() > 1));
+        return getTableauPiles().stream()
+                .map(Pile::getTopCard)
+                .anyMatch(this::existsPileTopGreaterThan) || canMoveToEmptyPile();
     }
 
-    private boolean stackOnlyCardIsAce(Stack stack) {
-        List<CardView> cards = stack.getCards();
+    private boolean canMoveToEmptyPile() {
+        return anyTableauPileIsEmpty() && anyTableauPilesHasMoreThanOneCards();
+    }
+
+    private boolean anyTableauPilesHasMoreThanOneCards() {
+        return getTableauPiles().stream().anyMatch(pile -> pile.getCards().size() > 1);
+    }
+
+    private boolean anyTableauPileIsEmpty() {
+        return getTableauPiles().stream().anyMatch(Pile::isEmpty);
+    }
+
+    private boolean pileOnlyCardIsAce(Pile pile) {
+        List<CardView> cards = pile.getCards();
         return cards.size() == 1 && cards.get(0).getCard().isAce();
     }
 
-    private boolean existsStackTopGreaterThan(Card myTopCard) {
-        return getStacks().stream()
-                .filter(otherStack -> topCardIn(otherStack).suit.equals(myTopCard.suit))
-                .anyMatch(otherStack -> {
-                    Card otherCard = topCardIn(otherStack);
+    private boolean existsPileTopGreaterThan(Card myTopCard) {
+        return getTableauPiles().stream()
+                .filter(otherPile -> otherPile.getTopCard().suit.equals(myTopCard.suit))
+                .anyMatch(otherPile -> {
+                    Card otherCard = otherPile.getTopCard();
                     return !myTopCard.isAce() && !otherCard.rank.equals(Rank.JOKER) &&
                             (otherCard.isAce() || otherCard.rank.numericValue() > myTopCard.rank.numericValue());
                 });

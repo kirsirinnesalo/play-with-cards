@@ -1,5 +1,7 @@
 package com.github.kirsirinnesalo.control;
 
+import com.github.kirsirinnesalo.model.Card;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -12,36 +14,37 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
-public class Stack extends StackPane {
+public class Pile extends StackPane {
 
-    public static final CornerRadii STACK_CORNER_RADII = new CornerRadii(3);
-    public static final Border EMPTY_STACK_BORDER = new Border(
-            new BorderStroke(Color.GRAY, BorderStrokeStyle.SOLID, STACK_CORNER_RADII, new BorderWidths(1))
+    private static final CornerRadii STACK_CORNER_RADII = new CornerRadii(3);
+    public static final Border EMPTY_PILE_BORDER = new Border(
+            new BorderStroke(Color.GOLD, BorderStrokeStyle.SOLID, STACK_CORNER_RADII, new BorderWidths(1))
     );
-    public static final Background EMPTY_STACK_BACKGROUND = new Background(
-            new BackgroundFill(Color.LIGHTGRAY, STACK_CORNER_RADII, Insets.EMPTY));
+    public static final Background EMPTY_PILE_BACKGROUND = new Background(
+            new BackgroundFill(Color.LIGHTYELLOW, STACK_CORNER_RADII, Insets.EMPTY));
 
     private final BooleanProperty emptyProperty = new SimpleBooleanProperty();
 
     private ObservableList<CardView> cards;
-    private StackShift shift = new ShiftDown(2);
+    private PileShift shift = new ShiftDown(2);
 
-    public Stack(ObservableList<CardView> cards) {
+    public Pile(ObservableList<CardView> cards) {
         this.cards = cards;
         emptyProperty.bind(Bindings.size(cards).isEqualTo(0));
         this.cards.addListener(getChangeListener());
     }
 
-    public Stack(ObservableList<CardView> cards, int width, int height) {
+    public Pile(ObservableList<CardView> cards, int width, int height) {
         this(cards);
         setPrefWidth(width);
         setPrefHeight(height);
     }
 
-    public void setShift(StackShift shift) {
+    public void setShift(PileShift shift) {
         this.shift = shift;
     }
 
@@ -50,6 +53,9 @@ public class Stack extends StackPane {
     }
 
     public CardView giveCard() {
+        if (cards.isEmpty()) {
+            return null;
+        }
         return cards.remove(cards.size() - 1);
     }
 
@@ -67,6 +73,13 @@ public class Stack extends StackPane {
 
     public void addAll(List<CardView> cards) {
         this.cards.addAll(cards);
+    }
+
+    public final Card getTopCard() {
+        return getCards().stream()
+                .reduce((a, b) -> b)
+                .orElse(new CardView(new Card(Card.Rank.JOKER, Card.Suit.JOKER)))
+                .getCard();
     }
 
     private ListChangeListener<CardView> getChangeListener() {
@@ -89,7 +102,7 @@ public class Stack extends StackPane {
                 shift.shiftOverlap(this,card);
             }
         }));
-        hideBackgroundFrom();
+        hideBackground();
     }
 
     private void removeCardNodes(List<? extends CardView> cardsToRemove) {
@@ -100,18 +113,20 @@ public class Stack extends StackPane {
                     .filter(cardsToRemove::contains)
                     .collect(toList());
             getChildren().removeAll(toBeRemoved);
-            if (getChildren().size() == 0) {
+            if (getChildren().stream()
+                    .filter(CardView.class::isInstance)
+                    .collect(toList()).size() == 0) {
                 viewEmptyBackground();
             }
         });
     }
 
     private void viewEmptyBackground() {
-        setBorder(EMPTY_STACK_BORDER);
-        setBackground(EMPTY_STACK_BACKGROUND);
+        setBorder(EMPTY_PILE_BORDER);
+        setBackground(EMPTY_PILE_BACKGROUND);
     }
 
-    private void hideBackgroundFrom() {
+    private void hideBackground() {
         setBorder(Border.EMPTY);
         setBackground(Background.EMPTY);
     }

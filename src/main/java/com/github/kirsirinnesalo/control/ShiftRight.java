@@ -1,6 +1,6 @@
 package com.github.kirsirinnesalo.control;
 
-public class ShiftRight extends StackShift {
+public class ShiftRight extends PileShift {
     public ShiftRight(double translateAmount) {
         super(translateAmount);
     }

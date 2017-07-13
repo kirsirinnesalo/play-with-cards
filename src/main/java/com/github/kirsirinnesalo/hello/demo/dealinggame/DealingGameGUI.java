@@ -83,7 +83,7 @@ public class DealingGameGUI extends Application {
         deckPane.setOnMouseEntered(e -> deckPane.setCursor(Cursor.HAND));
         game.getDeck().shuffle();
 
-        Label helpText = new Label("Deal by clicking the deck. Deck resets if there aren't enough cards to deal.");
+        Label helpText = new Label("Deal by clicking the deck. Deck resets if there aren't enough cards to hit.");
         helpText.setPadding(new Insets(30, 0, 0, 0));
         helpText.setWrapText(true);
 
