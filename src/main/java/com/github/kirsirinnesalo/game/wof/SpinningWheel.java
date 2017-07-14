@@ -1,5 +1,8 @@
 package com.github.kirsirinnesalo.game.wof;
 
+import javafx.animation.Animation;
+import javafx.animation.Interpolator;
+import javafx.animation.RotateTransition;
 import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
@@ -17,28 +20,27 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.function.Consumer;
 
 class SpinningWheel extends Group {
 
     private final Wheel theWheel;
 
-    SpinningWheel(ObservableList<Data> data) {
-        theWheel = new Wheel(data);
+    SpinningWheel(ObservableList<Data> slices) {
+        theWheel = new Wheel(slices);
         getChildren().addAll(theWheel, theWheel.spinButton, theWheel.spinLabel, theWheel.selector);
     }
 
-    Wheel getWheel() {
-        return theWheel;
-    }
-
-    Circle getSpinButton() {
+    SpinButton getSpinButton() {
         return theWheel.spinButton;
     }
 
-    ObservableList<Data> getData() {
+    ObservableList<Data> getSlices() {
         return theWheel.getData();
     }
 
@@ -46,13 +48,34 @@ class SpinningWheel extends Group {
         return theWheel.getSelectedData();
     }
 
+    void spin(Runnable onFinishedAction) {
+        RotateTransition rotation = new RotateTransition(Duration.millis(5000), theWheel);
+        rotation.setInterpolator(Interpolator.EASE_OUT);
+        rotation.setAutoReverse(false);
+        rotation.setCycleCount(1);
+        rotation.setOnFinished(event -> onFinishedAction.run());
+        if (rotation.getStatus() != Animation.Status.RUNNING) {
+            Random fortune = new Random(System.currentTimeMillis());
+            ObservableList<Data> slices = theWheel.getData();
+            int chosen = fortune.nextInt(slices.size());
+            double angle = 360.0 / slices.size();
+            rotation.setByAngle(2 * 360 + chosen * angle);
+            rotation.play();
+        }
+    }
+}
+
+class SpinButton extends Circle {
+    SpinButton() {
+        setFocusTraversable(true);
+    }
 }
 
 /* https://gist.github.com/jewelsea/b218c810b9d1009138bd */
 class Wheel extends PieChart {
     private static final int SPIN_BUTTON_RADIUS = 8;
 
-    final Circle spinButton = new Circle();
+    final SpinButton spinButton = new SpinButton();
     final Polygon selector = new Polygon();
     final Text spinLabel = new Text("Pyöritä");
     private final Circle wheelCenter = new Circle();

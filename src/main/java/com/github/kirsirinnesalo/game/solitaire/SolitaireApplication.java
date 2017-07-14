@@ -261,12 +261,12 @@ public abstract class SolitaireApplication extends FXGameApplication {
     }
 
     private void disableGame() {
-        getAllPiles().forEach(this::disablePile);
+        getAllPiles().forEach(this::disable);
         show(gameOverNode);
     }
 
     private void enableGame() {
-        getAllPiles().forEach(this::enablePile);
+        getAllPiles().forEach(this::enable);
         hide(gameOverNode);
     }
 
@@ -275,28 +275,6 @@ public abstract class SolitaireApplication extends FXGameApplication {
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .collect(toList());
-    }
-
-    private void disablePile(Pile pile) {
-        pile.setDisable(true);
-        pile.setOpacity(0.4);
-    }
-
-    private void enablePile(Pile pile) {
-        pile.setDisable(false);
-        pile.setOpacity(1);
-    }
-
-    private void show(Node... nodes) {
-        setVisible(true, nodes);
-    }
-
-    private void hide(Node... nodes) {
-        setVisible(false, nodes);
-    }
-
-    private void setVisible(boolean visible, Node... nodes) {
-        Arrays.stream(nodes).forEach(node -> node.setVisible(visible));
     }
 
     private void makeDraggable(CardView cardView) {

@@ -1,9 +1,12 @@
 package com.github.kirsirinnesalo.game;
 
 import javafx.application.Application;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+
+import java.util.Arrays;
 
 public abstract class FXGameApplication extends Application {
 
@@ -28,6 +31,32 @@ public abstract class FXGameApplication extends Application {
 
     public double getHeight() {
         return DEFAULT_HEIGHT;
+    }
+
+    protected void disable(Node... nodes) {
+        Arrays.stream(nodes).forEach(node -> {
+            node.setDisable(true);
+            node.setOpacity(0.4);
+        });
+    }
+
+    protected void enable(Node... nodes) {
+        Arrays.stream(nodes).forEach(node -> {
+            node.setDisable(false);
+            node.setOpacity(1);
+        });
+    }
+
+    protected void show(Node... nodes) {
+        setVisible(true, nodes);
+    }
+
+    protected void hide(Node... nodes) {
+        setVisible(false, nodes);
+    }
+
+    private void setVisible(boolean visible, Node... nodes) {
+        Arrays.stream(nodes).forEach(node -> node.setVisible(visible));
     }
 
     private Scene createScene() {

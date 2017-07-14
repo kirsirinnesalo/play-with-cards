@@ -222,18 +222,6 @@ public class BlackjackGUI extends FXGameApplication {
         return box;
     }
 
-    private void show(Node... nodes) {
-        setVisible(true, nodes);
-    }
-
-    private void hide(Node... nodes) {
-        setVisible(false, nodes);
-    }
-
-    private void setVisible(boolean visible, Node... nodes) {
-        Arrays.stream(nodes).forEach(node -> node.setVisible(visible));
-    }
-
     private void initBindings() {
         bindVisibleProperties();
         bindMoneyLabels();

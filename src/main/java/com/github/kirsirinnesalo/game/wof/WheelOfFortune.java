@@ -2,9 +2,6 @@ package com.github.kirsirinnesalo.game.wof;
 
 import com.github.kirsirinnesalo.game.FXGameApplication;
 
-import javafx.animation.Animation;
-import javafx.animation.Interpolator;
-import javafx.animation.RotateTransition;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -29,33 +26,44 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import javafx.util.Duration;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
 public class WheelOfFortune extends FXGameApplication {
 
-    private static final List<String> labelTexts = new ArrayList<>();
+    private static final List<String> sliceLabelTexts = new ArrayList<>();
+    private static final AtomicInteger sliceLabelIndex = new AtomicInteger(0);
     private static final List<String> phrases = new ArrayList<>();
+    private static final List<Player> players = new ArrayList<>();
     private static final int VOWEL_PRICE = 500;
     private static final String BORDER_STYLE = "-fx-border-color: dimgray; -fx-border-radius: 5;";
+    private static final String[] sliceColors = {
+            "#f9d900", //yellow
+            "#a9e200", //green
+            "#22bad9", //light blue
+            "#0181e2", //blue
+            "#860061", //purple
+            "#ff5700"  //orange
+    }; //x4
 
     static {
-        labelTexts.addAll(Stream.of(
+        sliceLabelTexts.addAll(Stream.of(
                 "ROSVO", "ROSVO",
                 "OHI", "OHI",
                 "50", "100", "150", "200", "250", "300", "350", "400", "450", "500",
                 "550", "600", "650", "700", "750", "800", "850", "900", "950", "1000"
         ).collect(toList()));
-        Collections.shuffle(labelTexts);
-    }
+        Collections.shuffle(sliceLabelTexts);
 
-    static {
         phrases.addAll(Stream.of(
                 "Parempi ystävä pöydässä kuin 10 Facebookissa.",
                 "Joukossa luovuus tiivistyy.",
@@ -70,21 +78,16 @@ public class WheelOfFortune extends FXGameApplication {
                 "Some on hyvä renki, mutta huono isäntä."
         ).collect(toList()));
         Collections.shuffle(phrases);
+
+        players.addAll(Stream.of(
+                new Player("Pelaaja 1"),
+                new Player("Pelaaja 2"),
+                new Player("Pelaaja 3")
+        ).collect(toList()));
     }
 
-    private final AtomicInteger labelIndex = new AtomicInteger(0);
     private String currentPhrase;
     private StringProperty hiddenPhrase = new SimpleStringProperty();
-    private String[] sliceColors = {
-            "#f9d900", //yellow
-            "#a9e200", //green
-            "#22bad9", //light blue
-            "#0181e2", //blue
-            "#860061", //purple
-            "#ff5700"  //orange
-    }; //x4
-
-    private List<Player> players = new ArrayList<>();
     private IntegerProperty currentPlayerIndex = new SimpleIntegerProperty(0);
 
     private SpinningWheel wheel;
@@ -120,28 +123,32 @@ public class WheelOfFortune extends FXGameApplication {
         table.getChildren().addAll(createTitle(), createPlayers(), createPhrase(), createWheel(),
                 createConsonantsBox(), createVowelBox(), createResolvePhraseField(), createButtons(),
                 createWinnerText());
+        newGame();
         return table;
     }
 
     private void newGame() {
-        winnerText.setVisible(false);
-        wheel.setOpacity(1);
+        sliceLabelIndex.set(0);
+
         players.forEach(Player::resetPoints);
         currentPlayerIndex.set(0);
-        enableLetters();
         usedLetters = "";
         currentPhrase = getRandomPhrase();
         resolvePhraseField.setText(null);
         setHiddenPhrase();
-        spinButton.setDisable(false);
+
+        hide(winnerText);
+        enable(wheel, spinButton);
+        enableLetters();
+
         Parent parent = wheel.getParent();
         parent.setOnMouseClicked(null);
         parent.setOnKeyPressed(null);
     }
 
     private void enableLetters() {
-        consonantsLeft.getChildren().forEach(node -> node.setDisable(false));
-        vowelsLeft.getChildren().forEach(node -> node.setDisable(false));
+        consonantsLeft.getChildren().forEach(this::enable);
+        vowelsLeft.getChildren().forEach(this::enable);
     }
 
     private Node createWinnerText() {
@@ -155,7 +162,7 @@ public class WheelOfFortune extends FXGameApplication {
                 " -fx-fill: linear-gradient(from 0% 0% to 100% 200%, repeat, aqua 0%, red 50%);\n" +
                         " -fx-stroke: black;\n" +
                         " -fx-stroke-width: 1;");
-        winnerText.setVisible(false);
+        hide(winnerText);
         return winnerText;
     }
 
@@ -173,35 +180,37 @@ public class WheelOfFortune extends FXGameApplication {
         Button resolvePhraseButton = new Button("Ratkaise");
         resolvePhraseButton.setOnAction(event -> checkPhrase(resolvePhraseField.getText()));
         box.getChildren().addAll(resolvePhraseField, resolvePhraseButton);
-        box.setVisible(false);
+        hide(box);
         resolvePhraseBox = box;
         return box;
     }
 
     private void checkPhrase(String text) {
-        if (currentPhrase.toLowerCase().replaceAll("[^a-zåäö ]", "")
-                .equals(text.toLowerCase().replaceAll("[^a-zåäö ]", ""))) {
-            spinButton.setDisable(true);
-            resolveButton.setDisable(true);
-            resolvePhraseBox.setVisible(false);
-            buyVowelButton.setVisible(false);
-            wheel.setOpacity(0.4);
+        if (lowerCaseAndRemoveSpecialCharsFrom(currentPhrase).equals(lowerCaseAndRemoveSpecialCharsFrom(text))) {
+            disable(wheel, spinButton, resolveButton, buyVowelButton);
+            hide(resolvePhraseBox);
             hiddenPhrase.set(currentPhrase);
             Player winner = players.get(currentPlayerIndex.get());
             winnerText.setText(winner.name + " on voittaja!");
-            winnerText.setVisible(true);
+            show(winnerText);
             Parent parent = wheel.getParent();
             parent.setOnMouseClicked(event -> newGame());
         } else {
             resolvePhraseField.setText("");
-            resolvePhraseBox.setVisible(false);
+            hide(resolvePhraseBox);
             nextPlayer();
         }
     }
 
+    private String lowerCaseAndRemoveSpecialCharsFrom(String text) {
+        return text.toLowerCase()
+                .replaceAll("[^a-zåäö 0-9]", " ")
+                .replaceAll("\\s+", " ").trim();
+    }
+
     private Pane createConsonantsBox() {
-        FlowPane box = createLetterBox();
-        box.getChildren().addAll(
+        consonantsLeft = createLetterBox();
+        consonantsLeft.getChildren().addAll(
                 getConsonant("B"), getConsonant("C"),
                 getConsonant("D"), getConsonant("F"),
                 getConsonant("G"), getConsonant("H"),
@@ -213,25 +222,19 @@ public class WheelOfFortune extends FXGameApplication {
                 getConsonant("V"), getConsonant("W"),
                 getConsonant("X"), getConsonant("Z")
         );
-        box.managedProperty().bind(box.visibleProperty());
-        box.setVisible(false);
-        consonantsLeft = box;
-        return box;
+        return consonantsLeft;
     }
 
     private Pane createVowelBox() {
-        FlowPane box = createLetterBox();
-        box.getChildren().addAll(
+        vowelsLeft = createLetterBox();
+        vowelsLeft.getChildren().addAll(
                 getVowel("A"), getVowel("E"),
                 getVowel("I"), getVowel("O"),
                 getVowel("U"), getVowel("Y"),
                 getVowel("Å"), getVowel("Ä"),
                 getVowel("Ö")
         );
-        box.managedProperty().bind(box.visibleProperty());
-        box.setVisible(false);
-        vowelsLeft = box;
-        return box;
+        return vowelsLeft;
     }
 
     private Button getConsonant(String letter) {
@@ -255,6 +258,8 @@ public class WheelOfFortune extends FXGameApplication {
         box.setLayoutY(280);
         box.setPadding(new Insets(10));
         box.setStyle(BORDER_STYLE);
+        box.managedProperty().bind(box.visibleProperty());
+        hide(box);
         return box;
     }
 
@@ -267,17 +272,16 @@ public class WheelOfFortune extends FXGameApplication {
     }
 
     private void selectConsonant(String letter) {
-        consonantsLeft.setVisible(false);
+        hide(consonantsLeft);
         Optional<Node> consonant = consonantsLeft.getChildren().stream()
                 .filter(node -> ((Button) node).getText().equals(letter))
                 .findFirst();
-        consonant.ifPresent(node -> node.setDisable(true));
+        consonant.ifPresent(this::disable);
         if (currentPhrase.toUpperCase().contains(letter)) {
             revealLetters(letter);
-            spinButton.setDisable(false);
-            resolveButton.setDisable(false);
+            enable(spinButton, resolveButton);
             if (players.get(currentPlayerIndex.get()).getPoints() >= VOWEL_PRICE) {
-                buyVowelButton.setVisible(true);
+                enable(buyVowelButton);
             }
         } else {
             nextPlayer();
@@ -285,14 +289,14 @@ public class WheelOfFortune extends FXGameApplication {
     }
 
     private void selectVowel(String letter) {
-        vowelsLeft.setVisible(false);
+        hide(vowelsLeft);
         Optional<Node> vowel = vowelsLeft.getChildren().stream()
                 .filter(node -> ((Button) node).getText().equals(letter))
                 .findFirst();
-        vowel.ifPresent(node -> node.setDisable(true));
+        vowel.ifPresent(this::disable);
         if (currentPhrase.toUpperCase().contains(letter)) {
             revealLetters(letter);
-            spinButton.setDisable(false);
+            enable(spinButton, resolveButton);
         } else {
             nextPlayer();
         }
@@ -304,13 +308,15 @@ public class WheelOfFortune extends FXGameApplication {
     }
 
     private VBox createButtons() {
-        VBox box = new VBox();
         resolveButton = createButton("Ratkaise");
-        resolveButton.setVisible(true);
         resolveButton.setOnAction(event -> showResolvePhraseField());
+        show(resolveButton);
+
         buyVowelButton = createButton("Osta vokaali");
-        buyVowelButton.setVisible(false);
         buyVowelButton.setOnAction(event -> buyVowel());
+        disable(buyVowelButton);
+
+        VBox box = new VBox();
         box.getChildren().addAll(resolveButton, buyVowelButton);
         box.setLayoutX(600);
         box.setLayoutY(175);
@@ -321,17 +327,17 @@ public class WheelOfFortune extends FXGameApplication {
     }
 
     private void showResolvePhraseField() {
-        resolveButton.setDisable(true);
-        buyVowelButton.setVisible(false);
-        resolvePhraseBox.setVisible(true);
+        disable(resolveButton, buyVowelButton);
+        show(resolvePhraseBox);
         resolvePhraseField.requestFocus();
     }
 
     private void buyVowel() {
-        vowelsLeft.setVisible(true);
+        disable(resolveButton);
+        show(vowelsLeft);
         Player player = players.get(currentPlayerIndex.get());
         player.add(-VOWEL_PRICE);
-        buyVowelButton.setVisible(false);
+        disable(buyVowelButton);
     }
 
     private Button createButton(String text) {
@@ -342,11 +348,6 @@ public class WheelOfFortune extends FXGameApplication {
     }
 
     private VBox createPlayers() {
-        players.addAll(Stream.of(
-                new Player("Pelaaja 1"),
-                new Player("Pelaaja 2"),
-                new Player("Pelaaja 3")
-        ).collect(toList()));
         VBox box = new VBox();
         players.forEach(player -> box.getChildren().add(createPlayerBox(player)));
         players.get(currentPlayerIndex.get()).setActive(true);
@@ -435,44 +436,29 @@ public class WheelOfFortune extends FXGameApplication {
 
     private SpinningWheel createWheel() {
         wheel = new SpinningWheel(createSlices());
-        changeSliceColors(wheel.getData());
+        changeSliceColors(wheel.getSlices());
         wheel.setLayoutX(100);
         wheel.setLayoutY(175);
         spinButton = wheel.getSpinButton();
-        spinButton.setOnMouseEntered(mouseEvent -> wheel.getSpinButton().setCursor(Cursor.HAND));
-        spinButton.setFocusTraversable(true);
+        spinButton.setOnMouseEntered(mouseEvent -> spinButton.setCursor(Cursor.HAND));
         spinButton.requestFocus();
-        setSpinHandlerFor(wheel);
+        spinButton.setOnMouseClicked(mouseEvent -> {
+            Player player = players.get(currentPlayerIndex.get());
+            wheel.spin(() -> handleSpinFor(player));
+            disable(resolveButton, spinButton, buyVowelButton);
+
+        });
         return wheel;
     }
 
-    private void setSpinHandlerFor(SpinningWheel wheel) {
-        RotateTransition rotation = new RotateTransition(Duration.millis(5000), wheel.getWheel());
-        rotation.setInterpolator(Interpolator.EASE_OUT);
-        rotation.setAutoReverse(false);
-        rotation.setCycleCount(1);
-        rotation.setOnFinished(e -> handleSpin(wheel, players.get(currentPlayerIndex.get())));
-        wheel.getSpinButton().setOnMouseClicked(mouseEvent -> {
-            if (rotation.getStatus() != Animation.Status.RUNNING) {
-                resolveButton.setDisable(true);
-                wheel.getSpinButton().setDisable(true);
-                Random fortune = new Random(System.currentTimeMillis());
-                int chosen = fortune.nextInt(labelTexts.size());
-                double angle = 360.0 / labelTexts.size();
-                rotation.setByAngle(2 * 360 + chosen * angle);
-                rotation.play();
-            }
-        });
-    }
-
-    private void handleSpin(SpinningWheel wheel, Player player) {
+    private void handleSpinFor(Player player) {
         PieChart.Data selectedData = wheel.getSelectedData();
         int value = getSliceValue(selectedData);
-        resolveButton.setDisable(false);
+        enable(resolveButton);
         if (value > 0) {
             player.add(value);
-            consonantsLeft.setVisible(true);
-            resolveButton.setDisable(true);
+            show(consonantsLeft);
+            disable(resolveButton);
         } else {
             if ("ROSVO".equals(selectedData.getName())) {
                 player.resetPoints();
@@ -492,14 +478,13 @@ public class WheelOfFortune extends FXGameApplication {
         Player player = players.get(nextPlayerIndex);
         player.setActive(true);
         currentPlayerIndex.set(nextPlayerIndex);
-        consonantsLeft.setVisible(false);
+        hide(consonantsLeft);
         if (player.getPoints() < VOWEL_PRICE) {
-            buyVowelButton.setVisible(false);
+            disable(buyVowelButton);
         } else {
-            buyVowelButton.setVisible(true);
+            enable(buyVowelButton);
         }
-        resolveButton.setDisable(false);
-        spinButton.setDisable(false);
+        enable(resolveButton, spinButton);
     }
 
     private int getSliceValue(PieChart.Data data) {
@@ -525,8 +510,8 @@ public class WheelOfFortune extends FXGameApplication {
     private ObservableList<PieChart.Data> createSlices() {
         ObservableList<PieChart.Data> slices = FXCollections.observableArrayList();
         IntStream.rangeClosed(1, 4).forEach(i ->
-                Arrays.stream(sliceColors).forEach(color -> {
-                    String name = labelTexts.get(labelIndex.getAndAdd(1));
+                stream(sliceColors).forEach(color -> {
+                    String name = sliceLabelTexts.get(sliceLabelIndex.getAndAdd(1));
                     slices.add(new PieChart.Data(name, 1));
                 })
         );
@@ -548,6 +533,13 @@ public class WheelOfFortune extends FXGameApplication {
         tempPhrases.remove(currentPhrase);
         Collections.shuffle(tempPhrases);
         return tempPhrases.get(0);
+    }
+
+    @Override
+    protected void disable(Node... nodes) {
+        super.disable(nodes);
+        stream(nodes).filter(SpinButton.class::isInstance)
+                .findFirst().ifPresent(spinBtn -> spinBtn.setOpacity(1));
     }
 }
 
