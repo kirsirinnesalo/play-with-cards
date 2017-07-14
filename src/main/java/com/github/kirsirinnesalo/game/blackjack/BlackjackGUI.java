@@ -1,19 +1,19 @@
 package com.github.kirsirinnesalo.game.blackjack;
 
-import com.github.kirsirinnesalo.model.Player;
 import com.github.kirsirinnesalo.control.CardView;
 import com.github.kirsirinnesalo.control.DeckPane;
 import com.github.kirsirinnesalo.control.HandPane;
+import com.github.kirsirinnesalo.game.FXGameApplication;
+import com.github.kirsirinnesalo.model.Player;
 import com.github.kirsirinnesalo.scene.util.Utils;
 
 import org.apache.commons.lang3.StringUtils;
 
-import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
-import javafx.scene.Scene;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -27,7 +27,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
-import javafx.stage.Stage;
 
 import java.util.Arrays;
 import java.util.OptionalInt;
@@ -36,7 +35,7 @@ import static com.github.kirsirinnesalo.game.blackjack.BlackjackGame.BLACKJACK;
 import static com.github.kirsirinnesalo.game.blackjack.BlackjackGame.Phase.*;
 import static com.github.kirsirinnesalo.game.blackjack.BlackjackPlayer.NOBODY;
 
-public class BlackjackGUI extends Application {
+public class BlackjackGUI extends FXGameApplication {
 
     private static final String GAME_TITLE = "Blackjack";
     private static final int CARD_WIDTH = 120;
@@ -66,27 +65,35 @@ public class BlackjackGUI extends Application {
     }
 
     @Override
-    public void start(Stage stage) {
-        stage.setTitle(GAME_TITLE);
-        stage.setScene(createScene());
-        stage.centerOnScreen();
-        stage.show();
+    public String getTitle() {
+        return GAME_TITLE;
     }
 
-    private Scene createScene() {
+    @Override
+    public double getWidth() {
+        return TABLE_WIDTH;
+    }
+
+    @Override
+    public double getHeight() {
+        return TABLE_HEIGHT;
+    }
+
+    @Override
+    public Parent createGameTable() {
         BorderPane table = new BorderPane();
         table.setBackground(Utils.getBackgroundWith(Color.DARKGREEN));
         table.setTop(createHeader());
         table.setBottom(createFooter());
         table.setLeft(createLeftBar());
         table.setRight(createRightBar());
-        table.setCenter(createGameTable());
+        table.setCenter(createGamePane());
 
         initBindings();
         hide(standButton, splitButton, doubleButton);
         show(betNode);
 
-        return new Scene(table, TABLE_WIDTH, TABLE_HEIGHT);
+        return table;
     }
 
     private Node createLeftBar() {
@@ -120,7 +127,7 @@ public class BlackjackGUI extends Application {
     }
 
 
-    private Node createGameTable() {
+    private Node createGamePane() {
         VBox pane = new VBox();
         pane.setBackground(Utils.getBackgroundWith(Color.WHITESMOKE));
         pane.setStyle("-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: #e0e0e0;");
