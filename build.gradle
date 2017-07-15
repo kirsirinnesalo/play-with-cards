@@ -1,12 +1,42 @@
+buildscript {
+    dependencies {
+        classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
+    }
+    repositories {
+        jcenter()
+    }
+}
 apply plugin: 'idea'
 apply plugin: 'java'
+apply plugin: 'javafx-gradle-plugin'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-jar {
-    baseName = 'Play with JavaFX'
-    version = "0.0.1"
+version = '0.1.0'
+ext.mainClassName = 'com.github.kirsirinnesalo.game.MyGames'
+
+jfx {
+    verbose = true
+    mainClass = mainClassName
+    vendor = 'KirsiRinnesalo'
+    appName = "Pelit"
+    nativeReleaseVersion = version
+    skipMainClassScanning = true
+    bundler = 'EXE'
+    needShortcut = true
+}
+
+task fatJar(type:Jar) {
+    manifest {
+        attributes(
+                "Implementation-Version": version,
+                "Main-Class": mainClassName
+        )
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 }
 
 repositories {
@@ -21,4 +51,3 @@ dependencies {
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
-

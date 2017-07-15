@@ -40,6 +40,10 @@ public class MyGames extends FXGameApplication {
         ));
     }
 
+    public static void main(String[] args) {
+        MyGames.launch(args);
+    }
+
     @Override
     public String getTitle() {
         return "Pelejä";
