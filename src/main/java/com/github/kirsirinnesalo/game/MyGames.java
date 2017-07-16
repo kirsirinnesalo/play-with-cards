@@ -5,6 +5,7 @@ import com.github.kirsirinnesalo.game.solitaire.AcesUp;
 import com.github.kirsirinnesalo.game.solitaire.Eternity;
 import com.github.kirsirinnesalo.game.solitaire.NapoleonsTomb;
 import com.github.kirsirinnesalo.game.wof.WheelOfFortune;
+import com.github.kirsirinnesalo.scene.util.Utils;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -12,32 +13,28 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.*;
 import javafx.stage.Stage;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 
 public class MyGames extends FXGameApplication {
-    private static List<Class<? extends FXGameApplication>> solitaires = new ArrayList<>();
-    private static List<Class<? extends FXGameApplication>> otherGames = new ArrayList<>();
+    private static Map<Class<? extends FXGameApplication>, String> solitaires = new LinkedHashMap<>();
+    private static Map<Class<? extends FXGameApplication>, String> otherGames = new LinkedHashMap<>();
 
     static {
-        solitaires.addAll(Arrays.asList(
-                AcesUp.class,
-                Eternity.class,
-                NapoleonsTomb.class
-        ));
-        otherGames.addAll(Arrays.asList(
-                BlackjackGUI.class,
-                WheelOfFortune.class
-        ));
+        solitaires.put(AcesUp.class, "acesup");
+        solitaires.put(Eternity.class, "ikuisuus");
+        solitaires.put(NapoleonsTomb.class, "napoleon");
+
+        otherGames.put(BlackjackGUI.class, "blackjack");
+        otherGames.put(WheelOfFortune.class, "onnenpyora");
     }
 
     public static void main(String[] args) {
@@ -56,7 +53,7 @@ public class MyGames extends FXGameApplication {
         parent.setAlignment(Pos.BASELINE_CENTER);
         parent.setVgap(20);
         parent.setPadding(new Insets(50));
-        parent.getChildren().addAll(getTitleLabel(), getGamesFlow(solitaires), getGamesFlow(otherGames));
+        parent.getChildren().addAll(getTitleLabel(), getGamesFlow(solitaires.keySet()), getGamesFlow(otherGames.keySet()));
         return parent;
     }
 
@@ -69,7 +66,7 @@ public class MyGames extends FXGameApplication {
         return box;
     }
 
-    private FlowPane getGamesFlow(List<Class<? extends FXGameApplication>> games) {
+    private FlowPane getGamesFlow(Set<Class<? extends FXGameApplication>> games) {
         FlowPane flow = new FlowPane();
         flow.setAlignment(Pos.BASELINE_CENTER);
         flow.setPrefWidth(getWidth());
@@ -82,19 +79,34 @@ public class MyGames extends FXGameApplication {
     private Button getButtonFor(Class<? extends FXGameApplication> gameClass) {
         Button button = new Button();
         try {
+            Map<Class<? extends FXGameApplication>, String> gameIconMap = new HashMap<>();
+            gameIconMap.putAll(solitaires);
+            gameIconMap.putAll(otherGames);
             Optional<FXGameApplication> application = Optional.ofNullable(gameClass.newInstance());
             application.ifPresent(game -> {
                 button.setText(game.getTitle());
                 button.setWrapText(true);
                 button.setTextAlignment(TextAlignment.CENTER);
-                button.setPrefWidth(100);
+                button.setStyle("-fx-font-weight: bold;");
+                button.setPrefWidth(120);
                 button.setPrefHeight(100);
+                setButtonIconForGame(button, gameIconMap, game);
                 button.setOnAction(event -> launchGame(game, getPrimaryStageFor(button)));
             });
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
         return button;
+    }
+
+    private void setButtonIconForGame(Button button, Map<Class<? extends FXGameApplication>, String> gameIconMap, FXGameApplication game) {
+        String imagePath = "icons/"+gameIconMap.get(game.getClass())+".png";
+        ImageView icon = new ImageView(Utils.getImage(imagePath));
+        icon.setPreserveRatio(true);
+        icon.setFitHeight(80);
+        button.setGraphic(icon);
+        button.setGraphicTextGap(10);
+        button.setContentDisplay(ContentDisplay.TOP);
     }
 
     private Stage getPrimaryStageFor(Button button) {

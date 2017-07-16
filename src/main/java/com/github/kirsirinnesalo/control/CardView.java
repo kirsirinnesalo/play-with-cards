@@ -1,6 +1,7 @@
 package com.github.kirsirinnesalo.control;
 
 import com.github.kirsirinnesalo.model.Card;
+import com.github.kirsirinnesalo.scene.util.Utils;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -63,16 +64,7 @@ public class CardView extends ImageView {
 
     private Image loadCardImage(String cardName) {
         String imagePath = "cards/" + cardName + ".png";
-        return getImage(imagePath);
-    }
-
-    private Image getImage(String imagePath) {
-        return new Image(getResource(imagePath));
-    }
-
-    private String getResource(String imagePathName) {
-        ClassLoader classLoader = this.getClass().getClassLoader();
-        return classLoader.getResource(imagePathName).toExternalForm();
+        return Utils.getImage(imagePath);
     }
 
     public Card getCard() {

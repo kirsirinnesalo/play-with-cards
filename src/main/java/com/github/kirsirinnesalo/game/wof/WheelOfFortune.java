@@ -1,6 +1,7 @@
 package com.github.kirsirinnesalo.game.wof;
 
 import com.github.kirsirinnesalo.game.FXGameApplication;
+import com.github.kirsirinnesalo.scene.util.Utils;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
@@ -20,6 +21,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.effect.Reflection;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
@@ -57,12 +59,11 @@ public class WheelOfFortune extends FXGameApplication {
 
     static {
         sliceLabelTexts.addAll(Stream.of(
-                "ROSVO", "ROSVO",
-                "OHI", "OHI",
-                "50", "100", "150", "200", "250", "300", "350", "400", "450", "500",
-                "550", "600", "650", "700", "750", "800", "850", "900", "950", "1000"
+                "ROSVO", "1000", "50", "300", "850", "400",
+                "OHI", "550", "100", "600", "350", "950",
+                "ROSVO", "700", "250", "500", "800", "200",
+                "OHI", "750", "150", "900", "450", "650"
         ).collect(toList()));
-        Collections.shuffle(sliceLabelTexts);
 
         phrases.addAll(Stream.of(
                 "Parempi ystävä pöydässä kuin 10 Facebookissa.",
@@ -125,6 +126,11 @@ public class WheelOfFortune extends FXGameApplication {
                 createWinnerText());
         newGame();
         return table;
+    }
+
+    @Override
+    protected Image getApplicationIcon() {
+        return Utils.getImage("icons/onnenpyora.png");
     }
 
     private void newGame() {

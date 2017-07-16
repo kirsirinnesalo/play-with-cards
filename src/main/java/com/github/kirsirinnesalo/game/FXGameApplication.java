@@ -1,9 +1,12 @@
 package com.github.kirsirinnesalo.game;
 
+import com.github.kirsirinnesalo.scene.util.Utils;
+
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.util.Arrays;
@@ -18,7 +21,12 @@ public abstract class FXGameApplication extends Application {
         primaryStage.setTitle(getTitle());
         primaryStage.setScene(createScene());
         primaryStage.centerOnScreen();
+        primaryStage.getIcons().add(getApplicationIcon());
         primaryStage.show();
+    }
+
+    protected Image getApplicationIcon() {
+        return Utils.getImage("icons/cardicon.png");
     }
 
     public abstract String getTitle();
