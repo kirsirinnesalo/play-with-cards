@@ -7,13 +7,13 @@ import com.github.kirsirinnesalo.model.Card.Rank;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.input.DragEvent;
-import javafx.scene.paint.Color;
-import javafx.scene.text.*;
+import javafx.scene.text.Text;
 
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.github.kirsirinnesalo.control.ShiftDown.SHIFT_NONE;
 import static com.github.kirsirinnesalo.game.solitaire.COLUMN.*;
 import static com.github.kirsirinnesalo.game.solitaire.ROW.*;
 import static com.github.kirsirinnesalo.model.Card.Rank.*;
@@ -43,10 +43,8 @@ enum ROW {
 }
 
 //FIXME waste shift pielessä kolmannella kierroksella
-
 //TODO jakopakka käännetään vain kaksi kertaa
 public class NapoleonsTomb extends SolitaireApplication {
-    private static final ShiftDown SHIFT_NONE = new ShiftDown(0);
     private static final PileShift ShiftThreeRight = new PileShift(5) {
         int cards = 1;
 
@@ -96,10 +94,6 @@ public class NapoleonsTomb extends SolitaireApplication {
         stock.setLayoutX(COLUMN_4.x);
         stock.setLayoutY(ROW_3.y);
         stock.setShift(SHIFT_NONE);
-        Text label = getPileLabel("O");
-        label.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 40));
-        label.setFill(Color.GREEN);
-        stock.getChildren().add(label);
         return stock;
     }
 
@@ -143,12 +137,6 @@ public class NapoleonsTomb extends SolitaireApplication {
         sixPile.setShift(new ShiftRight(1));
         sixPile.getChildren().add(getPileLabel("6"));
         return new ArrayList<>(Arrays.asList(sixPile, wastePile));
-    }
-
-    private Text getPileLabel(String text) {
-        Text label = new Text(text);
-        label.setFont(Font.font("Arial", FontWeight.NORMAL, FontPosture.ITALIC, 14));
-        return label;
     }
 
     @Override
@@ -203,12 +191,6 @@ public class NapoleonsTomb extends SolitaireApplication {
         return pile.getId().equals("reserve-stock");
     }
 
-    private void moveCard(Pile sourcePile, Pile targetPile) {
-        CardView card = sourcePile.giveCard();
-        card.setTranslateX(0);
-        targetPile.addCard(card);
-    }
-
     private Pile getPile(String id, COLUMN column, ROW row) {
         Pile pile = createPile(id, column.x, row.y);
         pile.setShift(new ShiftDown(0));
@@ -237,7 +219,8 @@ public class NapoleonsTomb extends SolitaireApplication {
         return Optional.ofNullable(acceptRank);
     }
 
-    private boolean isTableauPile(Pile pile) {
+    @Override
+    public boolean isTableauPile(Pile pile) {
         return pile.getId().startsWith("tableau-");
     }
 
@@ -251,10 +234,6 @@ public class NapoleonsTomb extends SolitaireApplication {
 
     private boolean isCenterPile(Pile pile) {
         return pile.getId().equals("foundation-center");
-    }
-
-    private boolean isFoundationPile(Pile pile) {
-        return getFoundationPiles().contains(pile);
     }
 
     private void checkIfGameOver() {

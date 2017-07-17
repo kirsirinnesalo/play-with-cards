@@ -1,8 +1,8 @@
 package com.github.kirsirinnesalo.game.solitaire;
 
 import com.github.kirsirinnesalo.control.CardView;
-import com.github.kirsirinnesalo.control.ShiftDown;
 import com.github.kirsirinnesalo.control.Pile;
+import com.github.kirsirinnesalo.control.ShiftDown;
 import com.github.kirsirinnesalo.model.Card;
 import com.github.kirsirinnesalo.model.Card.Rank;
 
@@ -59,7 +59,7 @@ public class Eternity extends SolitaireApplication {
                 .collect(toList()));
         piles.forEach(pile -> {
             makeDragTarget(pile);
-            pile.setShift(new ShiftDown(2));
+            pile.setShift(new ShiftDown(3));
             pile.setOnMouseClicked(event -> {
                 if (isDoubleClick(event)) {
                     Card myTopCard = pile.getTopCard();
@@ -113,10 +113,14 @@ public class Eternity extends SolitaireApplication {
             Pile sourcePile = (Pile) cardView.getParent();
             Pile targetPile = (Pile) event.getGestureTarget();
 
-            if (isTargetPileOnLeft(sourcePile, targetPile) && topCardRankEqual(targetPile, cardView)) {
+            boolean success = false;
+            if (isTargetPileOnLeft(sourcePile, targetPile) && topCardRankEqual(targetPile, sourcePile.getTopCardView())) {
                 sourcePile.giveCard();
                 targetPile.addCard(cardView);
+                success = true;
             }
+            event.setDropCompleted(success);
+            event.consume();
         };
     }
 

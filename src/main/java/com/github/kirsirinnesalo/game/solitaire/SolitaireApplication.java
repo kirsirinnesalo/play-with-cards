@@ -23,9 +23,7 @@ import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
+import javafx.scene.text.*;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -39,13 +37,6 @@ public abstract class SolitaireApplication extends FXGameApplication {
 
     private static final int CARD_WIDTH = 90;
     private static final int CARD_HEIGHT = 120;
-
-    private final EventHandler<DragEvent> onDragOverHandler = event -> {
-        if (event.getDragboard().hasString()) {
-            event.acceptTransferModes(TransferMode.MOVE);
-        }
-        event.consume();
-    };
     private final EventHandler<MouseEvent> onDragDetectedHandler = event -> {
         CardView cardView = (CardView) event.getTarget();
         ObservableList<CardView> cards = ((Pile) cardView.getParent()).getCards();
@@ -65,13 +56,26 @@ public abstract class SolitaireApplication extends FXGameApplication {
         }
         event.consume();
     };
-
+    private final EventHandler<DragEvent> onDragOverHandler = event -> {
+        if (event.getDragboard().hasString()) {
+            event.acceptTransferModes(TransferMode.MOVE);
+        }
+        event.consume();
+    };
     private Pile stock;
     private List<Pile> tableauPiles;
     private List<Pile> foundationPiles;
     private List<Pile> reservePiles;
     private Pile discardPile;
     private Group gameOverNode;
+
+    static int getCardWidth() {
+        return CARD_WIDTH;
+    }
+
+    static int getCardHeight() {
+        return CARD_HEIGHT;
+    }
 
     public abstract List<Pile> createTableauPiles();
 
@@ -84,6 +88,10 @@ public abstract class SolitaireApplication extends FXGameApplication {
     public abstract void hit();
 
     public abstract EventHandler<DragEvent> getOnDragDroppedHandler();
+
+    public EventHandler<? super MouseEvent> getOnDragDetectedHandler() {
+        return onDragDetectedHandler;
+    }
 
     public Pile getStock() {
         return stock;
@@ -105,6 +113,14 @@ public abstract class SolitaireApplication extends FXGameApplication {
         return discardPile;
     }
 
+    public boolean isFoundationPile(Pile pile) {
+        return getFoundationPiles().contains(pile);
+    }
+
+    public boolean isTableauPile(Pile pile) {
+        return getTableauPiles().contains(pile);
+    }
+
     public final boolean isDoubleClick(MouseEvent event) {
         return event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2;
     }
@@ -112,6 +128,12 @@ public abstract class SolitaireApplication extends FXGameApplication {
     public final void makeDragTarget(Pile pile) {
         pile.setOnDragOver(onDragOverHandler);
         pile.setOnDragDropped(getOnDragDroppedHandler());
+    }
+
+    public void moveCard(Pile sourcePile, Pile targetPile) {
+        CardView card = sourcePile.giveCard();
+        card.setTranslateX(0);
+        targetPile.addCard(card);
     }
 
     public void gameWon() {
@@ -141,20 +163,30 @@ public abstract class SolitaireApplication extends FXGameApplication {
     }
 
     public Node createStock() {
+        Text label = getPileLabel("O");
+        label.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 40));
+        label.setFill(Color.GREEN);
+
         stock = createPile("stock", 30, 45);
-        setUpStock();
         stock.setOnMouseClicked(e -> hit());
+        stock.getChildren().add(label);
+
+        setUpStock();
         return stock;
     }
 
+    Text getPileLabel(String text) {
+        Text label = new Text(text);
+        label.setFont(Font.font("Arial", FontWeight.NORMAL, FontPosture.ITALIC, 14));
+        return label;
+    }
+
     public void setUpStock() {
+        stock.clear();
         ObservableList<Card> cards = new Deck52().getCards();
         shuffle(cards);
         cards.forEach(card -> stock.addCard(createCardView(card)));
-        stock.getCards().forEach(card -> {
-            card.turnFaceDown();
-            card.setTranslateX(0);
-        });
+        stock.getCards().forEach(CardView::turnFaceDown);
     }
 
     public Pile createPile(String id, int layoutX, int layoutY) {
@@ -284,7 +316,7 @@ public abstract class SolitaireApplication extends FXGameApplication {
     }
 
     private void makeDraggable(CardView cardView) {
-        cardView.setOnDragDetected(onDragDetectedHandler);
+        cardView.setOnDragDetected(getOnDragDetectedHandler());
     }
 
 }

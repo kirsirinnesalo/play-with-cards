@@ -14,7 +14,6 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -76,10 +75,14 @@ public class Pile extends StackPane {
     }
 
     public final Card getTopCard() {
+        return getTopCardView()
+                .getCard();
+    }
+
+    public final CardView getTopCardView() {
         return getCards().stream()
                 .reduce((a, b) -> b)
-                .orElse(new CardView(new Card(Card.Rank.JOKER, Card.Suit.JOKER)))
-                .getCard();
+                .orElse(new CardView(new Card(Card.Rank.JOKER, Card.Suit.JOKER)));
     }
 
     private ListChangeListener<CardView> getChangeListener() {
@@ -99,7 +102,7 @@ public class Pile extends StackPane {
         cardsToAdd.forEach(card -> Platform.runLater(() -> {
             if (!cardList.contains(card)) {
                 cardList.add(card);
-                shift.shiftOverlap(this,card);
+                shift.shiftOverlap(this, card);
             }
         }));
         hideBackground();

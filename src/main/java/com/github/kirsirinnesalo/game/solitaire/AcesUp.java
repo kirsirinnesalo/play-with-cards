@@ -96,10 +96,12 @@ public class AcesUp extends SolitaireApplication {
             Pile sourcePile = (Pile) cardView.getParent();
             Pile targetPile = (Pile) event.getGestureTarget();
 
-            if (targetPile.isEmpty()) {
+            if (targetPile.isEmpty() && !sourcePile.equals(getStock())) {
                 sourcePile.giveCard();
                 targetPile.addCard(cardView);
             }
+
+            event.consume();
         };
     }
 

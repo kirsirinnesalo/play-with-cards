@@ -3,6 +3,7 @@ package com.github.kirsirinnesalo.game;
 import com.github.kirsirinnesalo.game.blackjack.BlackjackGUI;
 import com.github.kirsirinnesalo.game.solitaire.AcesUp;
 import com.github.kirsirinnesalo.game.solitaire.Eternity;
+import com.github.kirsirinnesalo.game.solitaire.Klondike;
 import com.github.kirsirinnesalo.game.solitaire.NapoleonsTomb;
 import com.github.kirsirinnesalo.game.wof.WheelOfFortune;
 import com.github.kirsirinnesalo.scene.util.Utils;
@@ -32,6 +33,7 @@ public class MyGames extends FXGameApplication {
         solitaires.put(AcesUp.class, "acesup");
         solitaires.put(Eternity.class, "ikuisuus");
         solitaires.put(NapoleonsTomb.class, "napoleon");
+        solitaires.put(Klondike.class, "klondike");
 
         otherGames.put(BlackjackGUI.class, "blackjack");
         otherGames.put(WheelOfFortune.class, "onnenpyora");
